@@ -39,6 +39,14 @@ abstract final class ApiConstants {
   static const String exerciseByTopicEndpoint = '/exercises/topic';
   static const String submitAnswerEndpoint = '/exercises/submit';
 
+  // ─── Practice Session Endpoints ──────────────────────────────────
+
+  static const String practiceStartEndpoint = '/practice/start';
+  static const String practiceAnswerEndpoint = '/practice/answer';
+  static const String practiceResultEndpoint = '/practice/result';
+  static const String practiceQuestionsEndpoint = '/practice/questions';
+  static const String practiceSubmitEndpoint = '/practice/submit';
+
   // ─── Progress Endpoints ───────────────────────────────────────────
 
   static const String progressEndpoint = '/progress';

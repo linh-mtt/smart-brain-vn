@@ -21,6 +21,8 @@ abstract final class RouteNames {
   static const String achievements = 'achievements';
   static const String settings = 'settings';
   static const String parentDashboard = 'parentDashboard';
+  static const String practice = 'practice';
+  static const String practiceResult = 'practiceResult';
 
   // ─── Route Paths ──────────────────────────────────────────────────
 
@@ -35,4 +37,6 @@ abstract final class RouteNames {
   static const String achievementsPath = '/achievements';
   static const String settingsPath = '/settings';
   static const String parentDashboardPath = '/parent';
+  static const String practicePath = '/practice';
+  static const String practiceResultPath = '/practice/result/:id';
 }

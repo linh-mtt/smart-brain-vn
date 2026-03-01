@@ -15,6 +15,8 @@ import 'route_names.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/achievements/presentation/pages/achievements_page.dart';
 import '../../features/parent/presentation/pages/parent_dashboard_page.dart';
+import '../../features/practice/presentation/pages/practice_page.dart';
+import '../../features/practice/presentation/pages/practice_result_page.dart';
 
 /// Shell scaffold with bottom navigation for main app sections.
 class _MainShellScaffold extends StatelessWidget {
@@ -191,6 +193,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: RouteNames.achievements,
         builder: (context, state) =>
             const AchievementsPage(),
+      ),
+      GoRoute(
+        path: RouteNames.practicePath,
+        name: RouteNames.practice,
+        builder: (context, state) {
+          final topic = state.uri.queryParameters['topic'] ?? 'general';
+          final questionCount = int.tryParse(
+            state.uri.queryParameters['count'] ?? '',
+          ) ?? 5;
+          return PracticePage(topic: topic, questionCount: questionCount);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.practiceResultPath,
+        name: RouteNames.practiceResult,
+        builder: (context, state) {
+          final sessionId = state.pathParameters['id'] ?? '';
+          return PracticeResultPage(sessionId: sessionId);
+        },
       ),
       GoRoute(
         path: RouteNames.settingsPath,
