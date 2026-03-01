@@ -1,10 +1,13 @@
 mod auth;
 mod config;
 mod db;
+mod domain;
+mod dto;
 mod error;
 mod handlers;
 mod middleware;
 mod models;
+mod repository;
 mod services;
 mod state;
 mod ws;
@@ -60,6 +63,20 @@ async fn main() {
         .await
         .expect("Failed to create Redis pool");
 
+    // Create auth service (Clean Architecture wiring)
+    let user_repo = std::sync::Arc::new(
+        crate::repository::user_repository::PgUserRepository::new(db_pool.clone()),
+    );
+    let token_repo = std::sync::Arc::new(
+        crate::repository::token_repository::RedisTokenRepository::new(redis_pool.clone()),
+    );
+    let auth_service = std::sync::Arc::new(
+        crate::services::auth_service::AuthService::new(
+            user_repo,
+            token_repo,
+            std::sync::Arc::new(config.clone()),
+        ),
+    );
     tracing::info!("Redis connection pool created successfully");
 
     // Create broadcast channel for WebSocket events
@@ -71,6 +88,7 @@ async fn main() {
         redis: redis_pool,
         config: Arc::new(config.clone()),
         ws_sender,
+        auth_service,
     };
 
     // Build middleware stack

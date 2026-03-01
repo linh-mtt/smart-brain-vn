@@ -5,7 +5,8 @@ use validator::Validate;
 
 use crate::auth::extractor::AuthUser;
 use crate::error::{ApiError, ApiResult};
-use crate::models::user::{UpdateProfileRequest, User, UserResponse};
+use crate::dto::auth::UserResponse;
+use crate::models::user::{UpdateProfileRequest, User};
 
 pub async fn get_me(
     auth: AuthUser,

@@ -43,6 +43,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 # Error Handling
 thiserror = "2"
 anyhow = "1"
+async-trait = "0.1"
 
 # Utilities
 rand = "0.8"

@@ -8,6 +8,7 @@ use tokio::sync::broadcast;
 
 use crate::config::Config;
 
+use crate::handlers::auth::ConcreteAuthService;
 pub type RedisPool = Pool<RedisConnectionManager>;
 
 #[derive(Clone)]
@@ -16,6 +17,7 @@ pub struct AppState {
     pub redis: RedisPool,
     pub config: Arc<Config>,
     pub ws_sender: broadcast::Sender<String>,
+    pub auth_service: Arc<ConcreteAuthService>,
 }
 
 impl FromRef<AppState> for PgPool {
@@ -39,5 +41,11 @@ impl FromRef<AppState> for Arc<Config> {
 impl FromRef<AppState> for broadcast::Sender<String> {
     fn from_ref(state: &AppState) -> Self {
         state.ws_sender.clone()
+    }
+}
+
+impl FromRef<AppState> for Arc<ConcreteAuthService> {
+    fn from_ref(state: &AppState) -> Self {
+        state.auth_service.clone()
     }
 }

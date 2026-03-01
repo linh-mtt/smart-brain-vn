@@ -1,10 +1,11 @@
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 
 use crate::config::Config;
+use crate::domain::user::DomainUser;
+use crate::dto::auth::TokenClaims;
 use crate::error::ApiResult;
-use crate::models::user::{TokenClaims, User};
 
-pub fn create_access_token(user: &User, config: &Config) -> ApiResult<String> {
+pub fn create_access_token(user: &DomainUser, config: &Config) -> ApiResult<String> {
     let now = chrono::Utc::now();
     let expires_at = now + config.jwt_access_expires_in;
 
@@ -25,7 +26,7 @@ pub fn create_access_token(user: &User, config: &Config) -> ApiResult<String> {
     Ok(token)
 }
 
-pub fn create_refresh_token(user: &User, config: &Config) -> ApiResult<String> {
+pub fn create_refresh_token(user: &DomainUser, config: &Config) -> ApiResult<String> {
     let now = chrono::Utc::now();
     let expires_at = now + config.jwt_refresh_expires_in;
 
