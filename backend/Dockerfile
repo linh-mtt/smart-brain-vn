@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM rust:1.85-bookworm AS builder
+FROM rust:1.88-bookworm AS builder
 WORKDIR /app
 COPY Cargo.toml Cargo.lock* ./
 # Create dummy main to cache dependencies
@@ -7,10 +7,10 @@ RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release 2>/dev/null || true
 RUN rm -rf src
 
-# Copy actual source
+# Copy actual source and force recompile
 COPY src ./src
 COPY migrations ./migrations
-RUN cargo build --release
+RUN touch src/main.rs && cargo build --release
 
 # Stage 2: Runtime
 FROM debian:bookworm-slim
