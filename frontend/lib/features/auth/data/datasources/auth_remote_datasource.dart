@@ -46,7 +46,7 @@ class AuthRemoteDatasource {
           'email': email,
           'username': username,
           'password': password,
-          'gradeLevel': gradeLevel,
+          'grade_level': gradeLevel,
           'age': age,
         },
         fromJson: (json) =>
@@ -64,7 +64,7 @@ class AuthRemoteDatasource {
     try {
       return await _apiClient.post<AuthResponseModel>(
         ApiConstants.refreshTokenEndpoint,
-        data: {'refreshToken': refreshToken},
+        data: {'refresh_token': refreshToken},
         fromJson: (json) =>
             AuthResponseModel.fromJson(json as Map<String, dynamic>),
       );
@@ -107,9 +107,9 @@ class AuthRemoteDatasource {
     int? gradeLevel,
   }) async {
     final data = <String, dynamic>{};
-    if (displayName != null) data['displayName'] = displayName;
-    if (avatarUrl != null) data['avatarUrl'] = avatarUrl;
-    if (gradeLevel != null) data['gradeLevel'] = gradeLevel;
+    if (displayName != null) data['display_name'] = displayName;
+    if (avatarUrl != null) data['avatar_url'] = avatarUrl;
+    if (gradeLevel != null) data['grade_level'] = gradeLevel;
 
     try {
       return await _apiClient.put<UserModel>(

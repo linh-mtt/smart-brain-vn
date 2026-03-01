@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/asset_paths.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/router/route_names.dart';
 import '../notifiers/auth_notifier.dart';
@@ -47,6 +49,13 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget lottieWidget = LottieBuilder.asset(
+      AssetPaths.splashAnimation,
+      width: 150,
+      height: 150,
+      fit: BoxFit.contain,
+    );
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -63,24 +72,8 @@ class _SplashPageState extends ConsumerState<SplashPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Logo icon
-                  Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.3),
-                              blurRadius: 24,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: const Center(
-                          child: Text('🧮', style: TextStyle(fontSize: 56)),
-                        ),
-                      )
+                  // Lottie animation logo
+                  lottieWidget
                       .animate()
                       .scale(
                         begin: const Offset(0.5, 0.5),

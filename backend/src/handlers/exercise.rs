@@ -17,6 +17,7 @@ use crate::services::gamification;
 use crate::services::math_engine::{self, Difficulty, MathTopic};
 use crate::state::RedisPool;
 use crate::ws::broadcast_event;
+use crate::handlers::leaderboard::ConcreteLeaderboardService;
 
 pub async fn generate(
     auth: AuthUser,
@@ -94,6 +95,7 @@ pub async fn submit(
     State(redis): State<RedisPool>,
     State(config): State<Arc<Config>>,
     State(ws_sender): State<broadcast::Sender<String>>,
+    State(leaderboard_service): State<Arc<ConcreteLeaderboardService>>,
     Json(body): Json<SubmitAnswerRequest>,
 ) -> ApiResult<Json<AnswerFeedback>> {
     // Look up the cached problem to validate the answer
@@ -165,7 +167,7 @@ pub async fn submit(
     update_topic_mastery(&pool, auth.user_id, &problem.topic, is_correct).await?;
 
     // Update leaderboard
-    update_leaderboard(&pool, auth.user_id, points_earned).await?;
+    update_leaderboard(&leaderboard_service, auth.user_id, points_earned).await?;
 
     // Check achievements
     let _ = check_and_unlock_achievements(&pool, &redis, auth.user_id, &ws_sender, &config).await;
@@ -315,30 +317,12 @@ pub(crate) async fn update_topic_mastery(
     Ok(())
 }
 
-pub(crate) async fn update_leaderboard(pool: &PgPool, user_id: Uuid, points: i32) -> ApiResult<()> {
-    if points <= 0 {
-        return Ok(());
-    }
-
-    for period in &["daily", "weekly", "all_time"] {
-        sqlx::query(
-            r#"
-            INSERT INTO leaderboard_entries (user_id, period, total_points, rank, updated_at)
-            VALUES ($1, $2, $3, 0, NOW())
-            ON CONFLICT (user_id, period)
-            DO UPDATE SET
-                total_points = leaderboard_entries.total_points + $3,
-                updated_at = NOW()
-            "#,
-        )
-        .bind(user_id)
-        .bind(period)
-        .bind(points)
-        .execute(pool)
-        .await?;
-    }
-
-    Ok(())
+pub(crate) async fn update_leaderboard(
+    service: &Arc<ConcreteLeaderboardService>,
+    user_id: Uuid,
+    points: i32,
+) -> ApiResult<()> {
+    service.update_points(user_id, points).await
 }
 
 pub(crate) async fn check_and_unlock_achievements(

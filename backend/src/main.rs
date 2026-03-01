@@ -106,6 +106,18 @@ async fn main() {
         ),
     );
 
+    // Create leaderboard service (Clean Architecture wiring)
+    let leaderboard_repo = std::sync::Arc::new(
+        crate::repository::leaderboard_repository::PgLeaderboardRepository::new(db_pool.clone()),
+    );
+    let leaderboard_service = std::sync::Arc::new(
+        crate::services::leaderboard_service::LeaderboardService::new(
+            leaderboard_repo,
+            redis_pool.clone(),
+            std::sync::Arc::new(config.clone()),
+        ),
+    );
+
     // Create broadcast channel for WebSocket events
     let (ws_sender, _) = broadcast::channel::<String>(1024);
 
@@ -118,6 +130,7 @@ async fn main() {
         auth_service,
         adaptive_engine,
         session_service,
+        leaderboard_service,
     };
 
     // Build middleware stack

@@ -44,6 +44,7 @@ pub fn api_router(state: AppState) -> Router<AppState> {
         .route("/achievements", get(achievement::list_achievements))
         // Leaderboard routes (protected)
         .route("/leaderboard", get(leaderboard::get_leaderboard))
+        .route("/leaderboard/me", get(leaderboard::get_my_rank))
         // Practice routes (adaptive engine, protected)
         .route("/practice/questions", get(practice::get_questions))
         .route("/practice/submit", post(practice::submit_practice))

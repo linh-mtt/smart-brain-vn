@@ -18,6 +18,7 @@ use crate::repository::session_repository::PgSessionRepository;
 use crate::repository::skill_repository::PgSkillRepository;
 use crate::services::session_service::SessionService;
 use crate::state::RedisPool;
+use crate::handlers::leaderboard::ConcreteLeaderboardService;
 
 /// Concrete type alias for dependency injection
 pub type ConcreteSessionService =
@@ -68,6 +69,7 @@ pub async fn submit_answer(
     State(redis): State<RedisPool>,
     State(config): State<Arc<Config>>,
     State(ws_sender): State<broadcast::Sender<String>>,
+    State(leaderboard_service): State<Arc<ConcreteLeaderboardService>>,
     Json(body): Json<SessionSubmitRequest>,
 ) -> ApiResult<Json<SessionSubmitResponse>> {
     body.validate()
@@ -128,7 +130,7 @@ pub async fn submit_answer(
     super::exercise::update_topic_mastery(&pool, auth.user_id, &body.topic, response.is_correct)
         .await?;
 
-    super::exercise::update_leaderboard(&pool, auth.user_id, response.points_earned).await?;
+    super::exercise::update_leaderboard(&leaderboard_service, auth.user_id, response.points_earned).await?;
 
     let _ = super::exercise::check_and_unlock_achievements(
         &pool,

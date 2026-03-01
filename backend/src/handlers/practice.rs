@@ -15,6 +15,7 @@ use crate::repository::question_repository::PgQuestionRepository;
 use crate::repository::skill_repository::PgSkillRepository;
 use crate::services::adaptive_engine::AdaptiveEngine;
 use crate::state::RedisPool;
+use crate::handlers::leaderboard::ConcreteLeaderboardService;
 
 /// Concrete type alias for dependency injection
 pub type ConcreteAdaptiveEngine = AdaptiveEngine<PgQuestionRepository, PgSkillRepository>;
@@ -66,6 +67,7 @@ pub async fn submit_practice(
     State(redis): State<RedisPool>,
     State(config): State<Arc<Config>>,
     State(ws_sender): State<broadcast::Sender<String>>,
+    State(leaderboard_service): State<Arc<ConcreteLeaderboardService>>,
     Json(body): Json<PracticeSubmitRequest>,
 ) -> ApiResult<Json<PracticeFeedbackResponse>> {
     // Delegate adaptive logic to the engine
@@ -110,7 +112,7 @@ pub async fn submit_practice(
     super::exercise::update_topic_mastery(&pool, auth.user_id, &body.topic, feedback.is_correct)
         .await?;
 
-    super::exercise::update_leaderboard(&pool, auth.user_id, feedback.points_earned).await?;
+    super::exercise::update_leaderboard(&leaderboard_service, auth.user_id, feedback.points_earned).await?;
 
     let _ = super::exercise::check_and_unlock_achievements(
         &pool,

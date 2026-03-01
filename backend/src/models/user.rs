@@ -133,22 +133,6 @@ pub struct AchievementResponse {
     pub unlocked_at: Option<DateTime<Utc>>,
 }
 
-// ─── Leaderboard Models ─────────────────────────────────────────────────────
-
-#[derive(Debug, Deserialize)]
-pub struct LeaderboardQuery {
-    pub period: Option<String>,
-}
-
-#[derive(Debug, Serialize, sqlx::FromRow)]
-pub struct LeaderboardEntry {
-    pub user_id: Uuid,
-    pub username: String,
-    pub display_name: Option<String>,
-    pub total_points: i64,
-    pub rank: i64,
-}
-
 // ─── Parent Models ───────────────────────────────────────────────────────────
 
 #[derive(Debug, Serialize)]

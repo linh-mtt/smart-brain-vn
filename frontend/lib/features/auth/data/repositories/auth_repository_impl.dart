@@ -5,7 +5,6 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_datasource.dart';
-import '../models/user_model.dart';
 
 /// Implementation of [AuthRepository] that coordinates between
 /// remote and local data sources.

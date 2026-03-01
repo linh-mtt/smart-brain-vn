@@ -12,8 +12,8 @@ part 'auth_response_model.g.dart';
 abstract class AuthResponseModel with _$AuthResponseModel {
   const factory AuthResponseModel({
     required UserModel user,
-    required String accessToken,
-    required String refreshToken,
+    @JsonKey(name: 'access_token') required String accessToken,
+    @JsonKey(name: 'refresh_token') required String refreshToken,
   }) = _AuthResponseModel;
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) =>
