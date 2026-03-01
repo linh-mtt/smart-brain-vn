@@ -6,6 +6,7 @@ pub mod leaderboard;
 pub mod parent;
 pub mod progress;
 pub mod user;
+pub mod practice;
 
 use axum::middleware as axum_mw;
 use axum::routing::{get, post, put};
@@ -42,6 +43,9 @@ pub fn api_router(state: AppState) -> Router<AppState> {
         .route("/achievements", get(achievement::list_achievements))
         // Leaderboard routes (protected)
         .route("/leaderboard", get(leaderboard::get_leaderboard))
+        // Practice routes (adaptive engine, protected)
+        .route("/practice/questions", get(practice::get_questions))
+        .route("/practice/submit", post(practice::submit_practice))
         // Parent routes (protected)
         .route("/parent/children", get(parent::list_children))
         .route(

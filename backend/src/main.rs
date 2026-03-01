@@ -79,6 +79,21 @@ async fn main() {
     );
     tracing::info!("Redis connection pool created successfully");
 
+    // Create adaptive engine (Clean Architecture wiring)
+    let question_repo = std::sync::Arc::new(
+        crate::repository::question_repository::PgQuestionRepository::new(db_pool.clone()),
+    );
+    let skill_repo = std::sync::Arc::new(
+        crate::repository::skill_repository::PgSkillRepository::new(db_pool.clone()),
+    );
+    let adaptive_engine = std::sync::Arc::new(
+        crate::services::adaptive_engine::AdaptiveEngine::new(
+            question_repo,
+            skill_repo,
+            std::sync::Arc::new(config.clone()),
+        ),
+    );
+
     // Create broadcast channel for WebSocket events
     let (ws_sender, _) = broadcast::channel::<String>(1024);
 
@@ -89,6 +104,7 @@ async fn main() {
         config: Arc::new(config.clone()),
         ws_sender,
         auth_service,
+        adaptive_engine,
     };
 
     // Build middleware stack

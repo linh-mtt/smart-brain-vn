@@ -229,7 +229,7 @@ pub async fn history(
 
 // ─── Internal Helpers ────────────────────────────────────────────────────────
 
-async fn update_daily_progress(
+pub(crate) async fn update_daily_progress(
     pool: &PgPool,
     user_id: Uuid,
     is_correct: bool,
@@ -286,7 +286,7 @@ async fn update_daily_progress(
     Ok(())
 }
 
-async fn update_topic_mastery(
+pub(crate) async fn update_topic_mastery(
     pool: &PgPool,
     user_id: Uuid,
     topic: &str,
@@ -315,7 +315,7 @@ async fn update_topic_mastery(
     Ok(())
 }
 
-async fn update_leaderboard(pool: &PgPool, user_id: Uuid, points: i32) -> ApiResult<()> {
+pub(crate) async fn update_leaderboard(pool: &PgPool, user_id: Uuid, points: i32) -> ApiResult<()> {
     if points <= 0 {
         return Ok(());
     }
@@ -341,7 +341,7 @@ async fn update_leaderboard(pool: &PgPool, user_id: Uuid, points: i32) -> ApiRes
     Ok(())
 }
 
-async fn check_and_unlock_achievements(
+pub(crate) async fn check_and_unlock_achievements(
     pool: &PgPool,
     _redis: &RedisPool,
     user_id: Uuid,
