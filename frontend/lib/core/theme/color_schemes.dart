@@ -1,0 +1,63 @@
+import 'package:flutter/material.dart';
+
+import '../constants/app_colors.dart';
+
+/// Light color scheme for the app.
+final ColorScheme lightColorScheme = ColorScheme(
+  brightness: Brightness.light,
+  primary: AppColors.primary,
+  onPrimary: Colors.white,
+  primaryContainer: AppColors.primaryLight,
+  onPrimaryContainer: AppColors.primaryDark,
+  secondary: AppColors.secondary,
+  onSecondary: Colors.white,
+  secondaryContainer: AppColors.secondaryLight,
+  onSecondaryContainer: AppColors.secondaryDark,
+  tertiary: AppColors.info,
+  onTertiary: Colors.white,
+  error: AppColors.error,
+  onError: Colors.white,
+  errorContainer: const Color(0xFFFFDAD6),
+  onErrorContainer: const Color(0xFF410002),
+  surface: AppColors.surface,
+  onSurface: AppColors.textPrimary,
+  onSurfaceVariant: AppColors.textSecondary,
+  outline: AppColors.divider,
+  outlineVariant: AppColors.disabled,
+  shadow: Colors.black.withValues(alpha: 0.08),
+  scrim: Colors.black.withValues(alpha: 0.3),
+  inverseSurface: AppColors.textPrimary,
+  onInverseSurface: AppColors.surface,
+  inversePrimary: AppColors.primaryLight,
+  surfaceTint: AppColors.primary,
+);
+
+/// Dark color scheme for the app.
+final ColorScheme darkColorScheme = ColorScheme(
+  brightness: Brightness.dark,
+  primary: const Color(0xFF8AB9F0),
+  onPrimary: const Color(0xFF1A3A5C),
+  primaryContainer: AppColors.primaryDark,
+  onPrimaryContainer: AppColors.primaryLight,
+  secondary: AppColors.secondaryLight,
+  onSecondary: const Color(0xFF5C2A10),
+  secondaryContainer: AppColors.secondaryDark,
+  onSecondaryContainer: AppColors.secondaryLight,
+  tertiary: const Color(0xFF82C8F6),
+  onTertiary: const Color(0xFF0A3049),
+  error: const Color(0xFFFFB4AB),
+  onError: const Color(0xFF690005),
+  errorContainer: const Color(0xFF93000A),
+  onErrorContainer: const Color(0xFFFFDAD6),
+  surface: const Color(0xFF1A1C2E),
+  onSurface: const Color(0xFFE4E1E9),
+  onSurfaceVariant: const Color(0xFFC8C5D0),
+  outline: const Color(0xFF938F9A),
+  outlineVariant: const Color(0xFF48464F),
+  shadow: Colors.black.withValues(alpha: 0.3),
+  scrim: Colors.black.withValues(alpha: 0.6),
+  inverseSurface: const Color(0xFFE4E1E9),
+  onInverseSurface: const Color(0xFF313040),
+  inversePrimary: AppColors.primary,
+  surfaceTint: const Color(0xFF8AB9F0),
+);

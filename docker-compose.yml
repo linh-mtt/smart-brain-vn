@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: smartmath-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-smartmath}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-smartmath_dev_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-smartmath}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - smartmath-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smartmath} -d ${POSTGRES_DB:-smartmath}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # DragonflyDB (Redis-compatible cache)
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    container_name: smartmath-dragonfly
+    command: >
+      --port 6379
+      --bind 0.0.0.0
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --cache_mode true
+      --requirepass ${REDIS_PASSWORD:-smartmath_redis_dev}
+      --snapshot_cron "*/30 * * * *"
+      --dbfilename dump.rdb
+      --dir /data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    ulimits:
+      memlock: -1
+    volumes:
+      - dragonfly-data:/data
+    networks:
+      - smartmath-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-smartmath_redis_dev}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Rust Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smartmath-backend
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-smartmath}:${POSTGRES_PASSWORD:-smartmath_dev_pass}@postgres:5432/${POSTGRES_DB:-smartmath}
+      REDIS_URL: redis://default:${REDIS_PASSWORD:-smartmath_redis_dev}@dragonfly:6379
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production_minimum_32_chars}
+      JWT_ACCESS_TOKEN_EXPIRES_IN: ${JWT_ACCESS_TOKEN_EXPIRES_IN:-15m}
+      JWT_REFRESH_TOKEN_EXPIRES_IN: ${JWT_REFRESH_TOKEN_EXPIRES_IN:-7d}
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 3000
+      RUST_LOG: ${RUST_LOG:-info,smartmath_backend=debug}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    networks:
+      - smartmath-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      dragonfly:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres-data:
+    driver: local
+  dragonfly-data:
+    driver: local
+
+networks:
+  smartmath-network:
+    driver: bridge

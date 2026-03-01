@@ -1,0 +1,59 @@
+name: smart_math_kids
+description: SmartMath Kids - Fun math learning for ages 6-12
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.0
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.0.0
+  riverpod_annotation: ^4.0.0
+  go_router: ^17.1.0
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.9.0
+  dio: ^5.7.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  flutter_animate: ^4.5.0
+  lottie: ^3.1.0
+  rive: ^0.14.3
+  fl_chart: ^1.1.1
+  flutter_secure_storage: ^10.0.0
+  logger: ^2.4.0
+  intl: ^0.20.2
+  gap: ^3.0.0
+  google_fonts: ^8.0.2
+  flutter_svg: ^2.0.0
+  cached_network_image: ^3.4.0
+  connectivity_plus: ^7.0.0
+  shimmer: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.0
+  freezed: ^3.2.5
+  json_serializable: ^6.8.0
+  riverpod_generator: ^4.0.3
+  riverpod_lint: ^3.1.3
+
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/animations/
+    - assets/images/
+    - assets/icons/
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Regular.ttf
+        - asset: assets/fonts/Nunito-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Nunito-SemiBold.ttf
+          weight: 600
