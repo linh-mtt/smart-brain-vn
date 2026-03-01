@@ -94,6 +94,18 @@ async fn main() {
         ),
     );
 
+    // Create session service (Clean Architecture wiring)
+    let session_repo = std::sync::Arc::new(
+        crate::repository::session_repository::PgSessionRepository::new(db_pool.clone()),
+    );
+    let session_service = std::sync::Arc::new(
+        crate::services::session_service::SessionService::new(
+            session_repo,
+            adaptive_engine.clone(),
+            std::sync::Arc::new(config.clone()),
+        ),
+    );
+
     // Create broadcast channel for WebSocket events
     let (ws_sender, _) = broadcast::channel::<String>(1024);
 
@@ -105,6 +117,7 @@ async fn main() {
         ws_sender,
         auth_service,
         adaptive_engine,
+        session_service,
     };
 
     // Build middleware stack

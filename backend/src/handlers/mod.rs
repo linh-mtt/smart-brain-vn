@@ -7,6 +7,7 @@ pub mod parent;
 pub mod progress;
 pub mod user;
 pub mod practice;
+pub mod session;
 
 use axum::middleware as axum_mw;
 use axum::routing::{get, post, put};
@@ -46,6 +47,10 @@ pub fn api_router(state: AppState) -> Router<AppState> {
         // Practice routes (adaptive engine, protected)
         .route("/practice/questions", get(practice::get_questions))
         .route("/practice/submit", post(practice::submit_practice))
+        // Practice session routes (session-based practice, protected)
+        .route("/practice/start", post(session::start_session))
+        .route("/practice/answer", post(session::submit_answer))
+        .route("/practice/result/{id}", get(session::get_result))
         // Parent routes (protected)
         .route("/parent/children", get(parent::list_children))
         .route(

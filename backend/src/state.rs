@@ -10,6 +10,7 @@ use crate::config::Config;
 
 use crate::handlers::auth::ConcreteAuthService;
 use crate::handlers::practice::ConcreteAdaptiveEngine;
+use crate::handlers::session::ConcreteSessionService;
 pub type RedisPool = Pool<RedisConnectionManager>;
 
 #[derive(Clone)]
@@ -20,6 +21,7 @@ pub struct AppState {
     pub ws_sender: broadcast::Sender<String>,
     pub auth_service: Arc<ConcreteAuthService>,
     pub adaptive_engine: Arc<ConcreteAdaptiveEngine>,
+    pub session_service: Arc<ConcreteSessionService>,
 }
 
 impl FromRef<AppState> for PgPool {
@@ -55,5 +57,11 @@ impl FromRef<AppState> for Arc<ConcreteAuthService> {
 impl FromRef<AppState> for Arc<ConcreteAdaptiveEngine> {
     fn from_ref(state: &AppState) -> Self {
         state.adaptive_engine.clone()
+    }
+}
+
+impl FromRef<AppState> for Arc<ConcreteSessionService> {
+    fn from_ref(state: &AppState) -> Self {
+        state.session_service.clone()
     }
 }
