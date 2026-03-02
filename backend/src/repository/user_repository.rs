@@ -48,6 +48,8 @@ fn user_to_domain(user: User) -> DomainUser {
         is_active: user.is_active,
         created_at: user.created_at,
         updated_at: user.updated_at,
+        total_xp: user.total_xp,
+        current_level: user.current_level,
     }
 }
 

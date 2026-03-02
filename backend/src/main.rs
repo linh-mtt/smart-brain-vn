@@ -118,6 +118,11 @@ async fn main() {
         ),
     );
 
+    // Create XP service (pool-based, no repository abstraction needed)
+    let xp_service = std::sync::Arc::new(
+        crate::services::xp_service::XpService::new(db_pool.clone()),
+    );
+
     // Create broadcast channel for WebSocket events
     let (ws_sender, _) = broadcast::channel::<String>(1024);
 
@@ -131,6 +136,7 @@ async fn main() {
         adaptive_engine,
         session_service,
         leaderboard_service,
+        xp_service,
     };
 
     // Build middleware stack

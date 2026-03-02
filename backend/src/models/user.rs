@@ -50,6 +50,8 @@ pub struct User {
     pub is_active: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub total_xp: i64,
+    pub current_level: i32,
 }
 
 #[derive(Debug, Deserialize, Validate)]

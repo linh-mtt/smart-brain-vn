@@ -9,8 +9,15 @@ import '../../../../core/widgets/gradient_background.dart';
 import '../../domain/entities/topic_progress_entity.dart';
 import '../notifiers/progress_notifier.dart';
 import '../providers/progress_providers.dart';
+import '../widgets/accuracy_line_chart.dart';
+import '../widgets/skill_radar_chart.dart';
+import '../widgets/speed_line_chart.dart';
+import '../widgets/weekly_comparison_bar_chart.dart';
 
-/// Progress page showing statistics and achievements.
+/// Progress page showing statistics, charts, and achievements.
+///
+/// Integrates fl_chart for accuracy trends, speed trends, weekly comparison,
+/// and skill breakdown radar chart alongside existing streak/stats/topic cards.
 class ProgressPage extends ConsumerStatefulWidget {
   const ProgressPage();
 
@@ -98,60 +105,11 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Streak Display
-              Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Current Streak',
-                          style: AppTextStyles.body2.copyWith(
-                            color: Colors.white70,
-                          ),
-                        ),
-                        const Gap(8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('🔥', style: const TextStyle(fontSize: 48)),
-                            const Gap(12),
-                            Text(
-                              '${summary?.currentStreak ?? 0} Days',
-                              style: AppTextStyles.scoreDisplay.copyWith(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Gap(12),
-                        Text(
-                          'Keep it up! Complete a problem to extend your streak.',
-                          style: AppTextStyles.caption.copyWith(
-                            color: Colors.white70,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  )
-                  .animate()
-                  .fadeIn(duration: 600.ms)
-                  .slideY(begin: -0.2, end: 0, duration: 600.ms),
+              // ─── Streak Display ──────────────────────────────
+              _StreakCard(currentStreak: summary?.currentStreak ?? 0),
               const Gap(24),
 
-              // Stats Overview
+              // ─── Stats Overview ──────────────────────────────
               Text('Overall Stats', style: AppTextStyles.heading3)
                   .animate()
                   .fadeIn(duration: 600.ms, delay: 100.ms)
@@ -189,90 +147,65 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               ),
               const Gap(24),
 
-              // Weekly Activity Chart (kept as mock — no weekly endpoint)
-              Text('Weekly Activity', style: AppTextStyles.heading3)
-                  .animate()
-                  .fadeIn(duration: 600.ms, delay: 200.ms)
-                  .slideX(begin: -0.2, end: 0, duration: 600.ms, delay: 200.ms),
-              const Gap(12),
-              Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.card,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.divider, width: 1),
+              // ─── Accuracy Trend Chart ────────────────────────
+              if (progressState.isLoadingCharts && !progressState.hasChartData)
+                _ChartLoadingPlaceholder(delay: 200)
+              else if (progressState.accuracyHistory.isNotEmpty)
+                AccuracyLineChart(dataPoints: progressState.accuracyHistory)
+                    .animate()
+                    .fadeIn(duration: 600.ms, delay: 200.ms)
+                    .slideY(
+                      begin: 0.2,
+                      end: 0,
+                      duration: 600.ms,
+                      delay: 200.ms,
                     ),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 150,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              _ActivityBar(
-                                day: 'Mon',
-                                height: 0.4,
-                                color: AppColors.grade1,
-                                delay: 300,
-                              ),
-                              _ActivityBar(
-                                day: 'Tue',
-                                height: 0.6,
-                                color: AppColors.grade2,
-                                delay: 400,
-                              ),
-                              _ActivityBar(
-                                day: 'Wed',
-                                height: 0.8,
-                                color: AppColors.grade3,
-                                delay: 500,
-                              ),
-                              _ActivityBar(
-                                day: 'Thu',
-                                height: 0.5,
-                                color: AppColors.grade4,
-                                delay: 600,
-                              ),
-                              _ActivityBar(
-                                day: 'Fri',
-                                height: 0.9,
-                                color: AppColors.grade5,
-                                delay: 700,
-                              ),
-                              _ActivityBar(
-                                day: 'Sat',
-                                height: 1.0,
-                                color: AppColors.grade6,
-                                delay: 800,
-                              ),
-                              _ActivityBar(
-                                day: 'Sun',
-                                height: 0.7,
-                                color: AppColors.primary,
-                                delay: 900,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Gap(16),
-                        Text(
-                          'Problems solved this week',
-                          style: AppTextStyles.caption,
-                        ),
-                      ],
-                    ),
-                  )
-                  .animate()
-                  .fadeIn(duration: 600.ms, delay: 300.ms)
-                  .slideY(begin: 0.2, end: 0, duration: 600.ms, delay: 300.ms),
-              const Gap(24),
+              if (progressState.accuracyHistory.isNotEmpty) const Gap(24),
 
-              // Topic Mastery
+              // ─── Weekly Comparison Chart ─────────────────────
+              if (progressState.weeklyComparison != null)
+                WeeklyComparisonBarChart(data: progressState.weeklyComparison!)
+                    .animate()
+                    .fadeIn(duration: 600.ms, delay: 300.ms)
+                    .slideY(
+                      begin: 0.2,
+                      end: 0,
+                      duration: 600.ms,
+                      delay: 300.ms,
+                    ),
+              if (progressState.weeklyComparison != null) const Gap(24),
+
+              // ─── Speed Trend Chart ───────────────────────────
+              if (progressState.speedHistory.isNotEmpty)
+                SpeedLineChart(dataPoints: progressState.speedHistory)
+                    .animate()
+                    .fadeIn(duration: 600.ms, delay: 400.ms)
+                    .slideY(
+                      begin: 0.2,
+                      end: 0,
+                      duration: 600.ms,
+                      delay: 400.ms,
+                    ),
+              if (progressState.speedHistory.isNotEmpty) const Gap(24),
+
+              // ─── Skill Radar Chart ───────────────────────────
+              if (topicProgress.isNotEmpty)
+                SkillRadarChart(topicProgress: topicProgress)
+                    .animate()
+                    .fadeIn(duration: 600.ms, delay: 500.ms)
+                    .slideY(
+                      begin: 0.2,
+                      end: 0,
+                      duration: 600.ms,
+                      delay: 500.ms,
+                    ),
+              if (topicProgress.isNotEmpty) const Gap(24),
+
+              // ─── Topic Mastery Cards ─────────────────────────
               Text('Topic Mastery', style: AppTextStyles.heading3)
                   .animate()
-                  .fadeIn(duration: 600.ms, delay: 400.ms)
-                  .slideX(begin: -0.2, end: 0, duration: 600.ms, delay: 400.ms),
+                  .fadeIn(duration: 600.ms, delay: 600.ms)
+                  .slideX(begin: -0.2, end: 0, duration: 600.ms, delay: 600.ms),
               const Gap(12),
               ..._buildTopicMasteryCards(topicProgress),
               const Gap(32),
@@ -322,7 +255,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           emoji: config['emoji']!,
           percentage: percentage,
           color: topicColors[i],
-          delay: 500 + (i * 100),
+          delay: 700 + (i * 100),
         ),
       );
     }
@@ -331,7 +264,112 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
   }
 }
 
-/// Stat tile showing icon, label, and value
+// ─── Streak Card ───────────────────────────────────────────────────────
+
+class _StreakCard extends StatelessWidget {
+  const _StreakCard({required this.currentStreak});
+
+  final int currentStreak;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Text(
+                'Current Streak',
+                style: AppTextStyles.body2.copyWith(color: Colors.white70),
+              ),
+              const Gap(8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('🔥', style: const TextStyle(fontSize: 48)),
+                  const Gap(12),
+                  Text(
+                    '$currentStreak Days',
+                    style: AppTextStyles.scoreDisplay.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              const Gap(12),
+              Text(
+                'Keep it up! Complete a problem to extend your streak.',
+                style: AppTextStyles.caption.copyWith(color: Colors.white70),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        )
+        .animate()
+        .fadeIn(duration: 600.ms)
+        .slideY(begin: -0.2, end: 0, duration: 600.ms);
+  }
+}
+
+// ─── Chart Loading Placeholder ─────────────────────────────────────────
+
+class _ChartLoadingPlaceholder extends StatelessWidget {
+  const _ChartLoadingPlaceholder({required this.delay});
+
+  final int delay;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.divider, width: 1),
+      ),
+      child: AspectRatio(
+        aspectRatio: 1.7,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 32,
+                height: 32,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation(
+                    AppColors.primary.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+              const Gap(12),
+              Text('Loading charts...', style: AppTextStyles.caption),
+            ],
+          ),
+        ),
+      ),
+    ).animate().fadeIn(
+      duration: 600.ms,
+      delay: Duration(milliseconds: delay),
+    );
+  }
+}
+
+// ─── Stat Tile ─────────────────────────────────────────────────────────
+
+/// Stat tile showing icon, label, and value.
 class _StatTile extends StatelessWidget {
   const _StatTile({
     required this.icon,
@@ -389,62 +427,9 @@ class _StatTile extends StatelessWidget {
   }
 }
 
-/// Activity bar for weekly chart
-class _ActivityBar extends StatelessWidget {
-  const _ActivityBar({
-    required this.day,
-    required this.height,
-    required this.color,
-    required this.delay,
-  });
+// ─── Topic Mastery Card ────────────────────────────────────────────────
 
-  final String day;
-  final double height;
-  final Color color;
-  final int delay;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Container(
-              width: 24,
-              height: 100 * height,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(8),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-            )
-            .animate()
-            .fadeIn(
-              duration: 600.ms,
-              delay: Duration(milliseconds: delay),
-            )
-            .scaleY(
-              begin: 0,
-              end: 1,
-              duration: 600.ms,
-              delay: Duration(milliseconds: delay),
-              curve: Curves.easeOutBack,
-            ),
-        const Gap(8),
-        Text(day, style: AppTextStyles.caption),
-      ],
-    );
-  }
-}
-
-/// Topic mastery card showing progress
+/// Topic mastery card showing progress.
 class _MasteryCard extends StatelessWidget {
   const _MasteryCard({
     required this.topic,

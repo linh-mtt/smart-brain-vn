@@ -17,6 +17,13 @@ import '../../features/achievements/presentation/pages/achievements_page.dart';
 import '../../features/parent/presentation/pages/parent_dashboard_page.dart';
 import '../../features/practice/presentation/pages/practice_page.dart';
 import '../../features/practice/presentation/pages/practice_result_page.dart';
+import '../../features/learning_tips/presentation/pages/learning_tips_page.dart';
+import '../../features/learning_tips/presentation/pages/tip_detail_page.dart';
+import '../../features/competition/presentation/pages/competition_lobby_page.dart';
+import '../../features/competition/presentation/pages/competition_match_page.dart';
+import '../../features/competition/presentation/pages/competition_result_page.dart';
+import '../../features/gamification/presentation/pages/theme_selection_page.dart';
+
 
 /// Shell scaffold with bottom navigation for main app sections.
 class _MainShellScaffold extends StatelessWidget {
@@ -224,6 +231,57 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             const ParentDashboardPage(),
       ),
+      GoRoute(
+        path: RouteNames.learningTipsPath,
+        name: RouteNames.learningTips,
+        builder: (context, state) => const LearningTipsPage(),
+        routes: [
+          GoRoute(
+            path: ':tipId',
+            name: RouteNames.tipDetail,
+            pageBuilder: (context, state) {
+              final tipId = state.pathParameters['tipId'] ?? '';
+              return CustomTransitionPage(
+                key: state.pageKey,
+                child: TipDetailPage(tipId: tipId),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(1.0, 0.0),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeInOut,
+                    )),
+                    child: child,
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
+      GoRoute(
+        path: RouteNames.competitionLobbyPath,
+        name: RouteNames.competitionLobby,
+        builder: (context, state) => const CompetitionLobbyPage(),
+      ),
+      GoRoute(
+        path: RouteNames.competitionMatchPath,
+        name: RouteNames.competitionMatch,
+        builder: (context, state) => const CompetitionMatchPage(),
+      ),
+      GoRoute(
+        path: RouteNames.competitionResultPath,
+        name: RouteNames.competitionResult,
+        builder: (context, state) => const CompetitionResultPage(),
+      ),
+      GoRoute(
+        path: RouteNames.themeSelectionPath,
+        name: RouteNames.themeSelection,
+        builder: (context, state) => const ThemeSelectionPage(),
+      ),
+
     ],
 
     // ─── Error Page ───────────────────────────────────────────────

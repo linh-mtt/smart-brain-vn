@@ -8,6 +8,7 @@ pub mod progress;
 pub mod user;
 pub mod practice;
 pub mod session;
+pub mod xp;
 
 use axum::middleware as axum_mw;
 use axum::routing::{get, post, put};
@@ -62,6 +63,11 @@ pub fn api_router(state: AppState) -> Router<AppState> {
             "/parent/child/{child_id}/goals",
             put(parent::update_goals),
         )
+        // XP / Gamification routes (protected)
+        .route("/xp/profile", get(xp::get_xp_profile))
+        .route("/xp/themes", get(xp::get_themes))
+        .route("/xp/themes/{id}/unlock", post(xp::unlock_theme))
+        .route("/xp/themes/{id}/activate", put(xp::activate_theme))
         .layer(axum_mw::from_fn_with_state(state, rate_limit_general));
 
     auth_routes.merge(general_routes)

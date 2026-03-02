@@ -17,6 +17,23 @@ abstract final class AssetPaths {
   static const String thinkingAnimation = '$_animations/thinking.json';
   static const String streakAnimation = '$_animations/streak.json';
 
+  // ─── Learning Tips Animations ──────────────────────────────────
+
+  static const String tipAdditionAnimation = '$_animations/tip_addition.json';
+  static const String tipMultiplicationAnimation =
+      '$_animations/tip_multiplication.json';
+  static const String tipMentalMathAnimation =
+      '$_animations/tip_mental_math.json';
+  static const String quizSuccessAnimation = '$_animations/quiz_success.json';
+
+  // ─── Competition Animations ───────────────────────────────────────
+
+  static const String countdownAnimation = '$_animations/countdown.json';
+  static const String victoryAnimation = '$_animations/victory.json';
+  static const String defeatAnimation = '$_animations/defeat.json';
+  static const String matchFoundAnimation = '$_animations/match_found.json';
+  static const String battleAnimation = '$_animations/battle.json';
+
   // ─── Images ───────────────────────────────────────────────────────
 
   static const String logoImage = '$_images/logo.png';

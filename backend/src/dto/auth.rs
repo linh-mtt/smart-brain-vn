@@ -60,6 +60,8 @@ pub struct UserResponse {
     pub is_active: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub total_xp: i64,
+    pub current_level: i32,
 }
 
 impl From<DomainUser> for UserResponse {
@@ -76,6 +78,8 @@ impl From<DomainUser> for UserResponse {
             is_active: user.is_active,
             created_at: user.created_at,
             updated_at: user.updated_at,
+            total_xp: user.total_xp,
+            current_level: user.current_level,
         }
     }
 }
@@ -95,6 +99,8 @@ impl From<crate::models::user::User> for UserResponse {
             is_active: user.is_active,
             created_at: user.created_at,
             updated_at: user.updated_at,
+            total_xp: user.total_xp,
+            current_level: user.current_level,
         }
     }
 }

@@ -1,0 +1,13 @@
+.dart_tool/
+.idea/
+.vscode/
+build/
+test/
+integration_test/
+*.md
+LICENSE
+.env
+.env.*
+.gitignore
+.metadata
+coverage/

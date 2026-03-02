@@ -9,6 +9,13 @@ abstract final class ApiConstants {
     defaultValue: 'http://localhost:3000',
   );
 
+  /// WebSocket base URL (derived from baseUrl).
+  /// Replaces http:// with ws:// and https:// with wss://.
+  static String get wsBaseUrl {
+    final url = baseUrl.replaceFirst('http://', 'ws://').replaceFirst('https://', 'wss://');
+    return '$url/api/$apiVersion/ws';
+  }
+
   /// API version prefix.
   static const String apiVersion = 'v1';
 
@@ -63,4 +70,25 @@ abstract final class ApiConstants {
   static const String parentDashboardEndpoint = '/parent/dashboard';
   static const String parentChildrenEndpoint = '/parent/children';
   static const String parentSettingsEndpoint = '/parent/settings';
+
+  // ─── Competition Endpoints ──────────────────────────────────────
+
+  static const String competitionMatchEndpoint = '/competition/match';
+  static const String competitionResultEndpoint = '/competition/result';
+
+  // ─── XP / Gamification Endpoints ────────────────────────────────
+  
+  static const String xpProfileEndpoint = '/xp/profile';
+  static const String xpThemesEndpoint = '/xp/themes';
+
+
+
+  /// WebSocket reconnection delay in milliseconds.
+  static const int wsReconnectDelay = 1000;
+
+  /// Maximum WebSocket reconnection delay in milliseconds.
+  static const int wsMaxReconnectDelay = 30000;
+
+  /// Maximum number of WebSocket reconnection attempts.
+  static const int wsMaxReconnectAttempts = 10;
 }

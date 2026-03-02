@@ -23,6 +23,13 @@ abstract final class RouteNames {
   static const String parentDashboard = 'parentDashboard';
   static const String practice = 'practice';
   static const String practiceResult = 'practiceResult';
+  static const String learningTips = 'learningTips';
+  static const String tipDetail = 'tipDetail';
+  static const String competitionLobby = 'competitionLobby';
+  static const String competitionMatch = 'competitionMatch';
+  static const String competitionResult = 'competitionResult';
+
+  static const String themeSelection = 'themeSelection';
 
   // ─── Route Paths ──────────────────────────────────────────────────
 
@@ -39,4 +46,11 @@ abstract final class RouteNames {
   static const String parentDashboardPath = '/parent';
   static const String practicePath = '/practice';
   static const String practiceResultPath = '/practice/result/:id';
+  static const String learningTipsPath = '/learning-tips';
+  static const String tipDetailPath = '/learning-tips/:tipId';
+  static const String competitionLobbyPath = '/competition';
+  static const String competitionMatchPath = '/competition/match';
+  static const String competitionResultPath = '/competition/result';
+  static const String themeSelectionPath = '/themes';
+
 }

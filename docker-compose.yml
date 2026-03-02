@@ -85,6 +85,31 @@ services:
         condition: service_healthy
       dragonfly:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Flutter Web Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smartmath-frontend
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    networks:
+      - smartmath-network
+    depends_on:
+      - backend
     restart: unless-stopped
     logging:
       driver: "json-file"
