@@ -161,11 +161,13 @@ docker compose exec postgres psql -U smartmath -d smartmath
 
 ## 5. Running Locally (Without Docker)
 
-### 5.1 Start Infrastructure
+### 5.1 Start Infrastructure (Hybrid Mode)
+
+Use the dedicated infrastructure compose file to start only the required services (PostgreSQL & DragonflyDB). This ensures you have the necessary environment without running the application containers.
 
 ```bash
-# Start only PostgreSQL and DragonflyDB via Docker
-docker compose up -d postgres dragonfly
+# Start infrastructure services
+docker compose -f docker-compose.infra.yml up -d
 ```
 
 ### 5.2 Backend

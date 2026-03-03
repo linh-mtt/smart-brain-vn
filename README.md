@@ -104,6 +104,34 @@ graph TB
 - Backend: `http://localhost:3000`
 - Frontend: `http://localhost:8080`
 
+## Hybrid Start Mode
+
+This mode allows you to run infrastructure services (Database, Cache) via Docker while running the Backend and Frontend applications manually on your host machine for a better development experience (debugging, hot reload).
+
+1. **Start Infrastructure Services**:
+   Use the `docker-compose.infra.yml` file to start PostgreSQL and DragonflyDB.
+   ```bash
+   docker compose -f docker-compose.infra.yml up -d
+   ```
+
+2. **Start Backend (Rust)**:
+   ```bash
+   cd backend
+   # Install dependencies (if not already cached)
+   cargo build
+   # Start the server
+   cargo run
+   ```
+
+3. **Start Frontend (Flutter)**:
+   ```bash
+   cd frontend
+   # Install dependencies
+   flutter pub get
+   # Start the app
+   flutter run
+   ```
+
 ## Docker Usage
 
 The project includes a full Docker Compose configuration for both development and production-like environments.
