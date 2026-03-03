@@ -1,3 +1,5 @@
+🇬🇧 **English** | 🇻🇳 [Tiếng Việt](README.vi.md)
+
 ![Build Status](https://img.shields.io/github/actions/workflow/status/smartmath/smart-brain-vn/rust.yml?branch=product&label=Backend%20CI)
 ![Flutter CI](https://img.shields.io/github/actions/workflow/status/smartmath/smart-brain-vn/flutter.yml?branch=product&label=Flutter%20CI)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)
