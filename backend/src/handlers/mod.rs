@@ -22,6 +22,7 @@ pub fn api_router(state: AppState) -> Router<AppState> {
     let auth_routes = Router::new()
         .route("/auth/register", post(auth::register))
         .route("/auth/login", post(auth::login))
+        .route("/auth/google", post(auth::google_login))
         .route("/auth/refresh", post(auth::refresh))
         .route("/auth/logout", post(auth::logout))
         .layer(axum_mw::from_fn_with_state(state.clone(), rate_limit_auth));

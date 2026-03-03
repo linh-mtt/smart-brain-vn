@@ -21,7 +21,12 @@ abstract final class EnvConfig {
     );
 
     // Load base .env first (lowest priority)
-    await dotenv.load(fileName: '.env', isOptional: true);
+    try {
+      await dotenv.load(fileName: '.env', isOptional: true);
+    } catch (e) {
+      // Ignore if .env file is missing
+      debugPrint('[EnvConfig] .env file not found or failed to load: $e');
+    }
 
     // Override with higher-priority files (last loaded wins)
     // Order: .env.local → .env.[mode] → .env.[mode].local

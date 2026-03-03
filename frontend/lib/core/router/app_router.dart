@@ -23,7 +23,7 @@ import '../../features/competition/presentation/pages/competition_lobby_page.dar
 import '../../features/competition/presentation/pages/competition_match_page.dart';
 import '../../features/competition/presentation/pages/competition_result_page.dart';
 import '../../features/gamification/presentation/pages/theme_selection_page.dart';
-
+import '../../features/auth/data/models/user_model.dart';
 
 /// Shell scaffold with bottom navigation for main app sections.
 class _MainShellScaffold extends StatelessWidget {
@@ -72,23 +72,51 @@ class _MainShellScaffold extends StatelessWidget {
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+/// A [Listenable] that notifies when [authNotifierProvider] changes.
+class AuthNotifierListenable extends ChangeNotifier {
+  AuthNotifierListenable(this.ref) {
+    ref.listen<AsyncValue<UserModel?>>(authNotifierProvider, (previous, next) {
+      notifyListeners();
+    });
+  }
+
+  final Ref ref;
+}
+
+final authListenableProvider = Provider<AuthNotifierListenable>((ref) {
+  return AuthNotifierListenable(ref);
+});
+
 /// Provides the configured [GoRouter] instance.
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authNotifierProvider);
+  final authListenable = ref.watch(authListenableProvider);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: RouteNames.splashPath,
+    refreshListenable: authListenable,
     debugLogDiagnostics: true,
     redirect: (context, state) {
+      final authState = ref.read(authNotifierProvider);
+
       final isLoggedIn = authState.value != null;
       final isOnSplash = state.matchedLocation == RouteNames.splashPath;
       final isOnAuth =
           state.matchedLocation == RouteNames.loginPath ||
           state.matchedLocation == RouteNames.registerPath;
 
+      debugPrint(
+        'Router Redirect: path=${state.matchedLocation}, isLoggedIn=$isLoggedIn, isOnAuth=$isOnAuth, isLoading=${authState.isLoading}',
+      );
+
       // Don't redirect while on splash (it handles its own navigation)
-      if (isOnSplash) return null;
+      if (isOnSplash) {
+        // If we are on splash, but we are ALREADY logged in (e.g. from hot reload or fast auth check),
+        // we might want to redirect to home immediately?
+        // But SplashPage has animations. Let's let SplashPage handle it unless it's taking too long?
+        // Actually, if we return null, SplashPage stays.
+        return null;
+      }
 
       // If loading auth state, don't redirect
       if (authState.isLoading) return null;
@@ -98,7 +126,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return RouteNames.loginPath;
       }
 
-      // Logged in but on auth pages → redirect to home
+      // If logged in and on auth page → redirect to home
       if (isLoggedIn && isOnAuth) {
         return RouteNames.homePath;
       }
@@ -137,8 +165,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: RouteNames.homePath,
                 name: RouteNames.home,
-                builder: (context, state) =>
-                    const HomePage(),
+                builder: (context, state) => const HomePage(),
               ),
             ],
           ),
@@ -149,15 +176,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: RouteNames.exercisePath,
                 name: RouteNames.exercise,
-                builder: (context, state) =>
-                    const ExercisesPage(),
+                builder: (context, state) => const ExercisesPage(),
                 routes: [
                   GoRoute(
                     path: ':topic/:difficulty',
                     name: RouteNames.exerciseTopic,
                     builder: (context, state) {
                       final topic = state.pathParameters['topic'] ?? 'general';
-                      final difficulty = state.pathParameters['difficulty'] ?? 'easy';
+                      final difficulty =
+                          state.pathParameters['difficulty'] ?? 'easy';
                       return ExercisePlayPage(
                         topic: topic,
                         difficulty: difficulty,
@@ -175,8 +202,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: RouteNames.progressPath,
                 name: RouteNames.progress,
-                builder: (context, state) =>
-                    const ProgressPage(),
+                builder: (context, state) => const ProgressPage(),
               ),
             ],
           ),
@@ -198,17 +224,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteNames.achievementsPath,
         name: RouteNames.achievements,
-        builder: (context, state) =>
-            const AchievementsPage(),
+        builder: (context, state) => const AchievementsPage(),
       ),
       GoRoute(
         path: RouteNames.practicePath,
         name: RouteNames.practice,
         builder: (context, state) {
           final topic = state.uri.queryParameters['topic'] ?? 'general';
-          final questionCount = int.tryParse(
-            state.uri.queryParameters['count'] ?? '',
-          ) ?? 5;
+          final questionCount =
+              int.tryParse(state.uri.queryParameters['count'] ?? '') ?? 5;
           return PracticePage(topic: topic, questionCount: questionCount);
         },
       ),
@@ -228,8 +252,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteNames.parentDashboardPath,
         name: RouteNames.parentDashboard,
-        builder: (context, state) =>
-            const ParentDashboardPage(),
+        builder: (context, state) => const ParentDashboardPage(),
       ),
       GoRoute(
         path: RouteNames.learningTipsPath,
@@ -244,18 +267,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               return CustomTransitionPage(
                 key: state.pageKey,
                 child: TipDetailPage(tipId: tipId),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  return SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeInOut,
-                    )),
-                    child: child,
-                  );
-                },
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return SlideTransition(
+                        position:
+                            Tween<Offset>(
+                              begin: const Offset(1.0, 0.0),
+                              end: Offset.zero,
+                            ).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeInOut,
+                              ),
+                            ),
+                        child: child,
+                      );
+                    },
               );
             },
           ),
@@ -281,7 +308,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: RouteNames.themeSelection,
         builder: (context, state) => const ThemeSelectionPage(),
       ),
-
     ],
 
     // ─── Error Page ───────────────────────────────────────────────

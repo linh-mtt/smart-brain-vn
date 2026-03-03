@@ -117,9 +117,10 @@ This mode allows you to run infrastructure services (Database, Cache) via Docker
 2. **Start Backend (Rust)**:
    ```bash
    cd backend
-   # Install dependencies (if not already cached)
-   cargo build
-   # Start the server
+   # Start with Hot Reload (Recommended for Dev)
+   ./dev.sh
+   
+   # Or standard run
    cargo run
    ```
 

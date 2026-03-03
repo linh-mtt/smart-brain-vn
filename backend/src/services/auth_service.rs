@@ -1,11 +1,12 @@
 use std::sync::Arc;
 
+use uuid::Uuid;
 use validator::Validate;
 
 use crate::auth::jwt::{create_access_token, create_refresh_token};
 use crate::auth::password::{hash_password, verify_password};
 use crate::config::Config;
-use crate::dto::auth::{AuthResponse, CreateUserRequest, LoginRequest, RefreshTokenRequest, UserResponse};
+use crate::dto::auth::{AuthResponse, CreateUserRequest, GoogleLoginRequest, LoginRequest, RefreshTokenRequest, UserResponse};
 use crate::error::{ApiError, ApiResult};
 use crate::models::user::UserRole;
 use crate::repository::token_repository::TokenRepository;
@@ -168,6 +169,86 @@ impl<U: UserRepository, T: TokenRepository> AuthService<U, T> {
 
         tracing::debug!("User logged out, refresh token deleted");
         Ok(())
+    }
+
+    pub async fn google_login(&self, body: &GoogleLoginRequest) -> ApiResult<AuthResponse> {
+        // Validate request
+        body.validate()
+            .map_err(|e| ApiError::ValidationError(e.to_string()))?;
+
+        // Verify ID Token with Google
+        let client = reqwest::Client::new();
+        let url = format!("https://oauth2.googleapis.com/tokeninfo?id_token={}", body.id_token);
+        let google_response = client
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| ApiError::InternalError(format!("Failed to contact Google: {}", e)))?;
+
+        if !google_response.status().is_success() {
+            return Err(ApiError::Unauthorized);
+        }
+
+        let google_claims: serde_json::Value = google_response
+            .json()
+            .await
+            .map_err(|e| ApiError::InternalError(format!("Failed to parse Google response: {}", e)))?;
+
+        let email = google_claims["email"]
+            .as_str()
+            .ok_or(ApiError::Unauthorized)?
+            .to_string();
+
+        let name = google_claims["name"].as_str().map(|s: &str| s.to_string());
+
+        // Check if user exists
+        let user_option = self.user_repo.find_by_email(&email).await?;
+        
+        let user = match user_option {
+            Some(existing_user) => existing_user,
+            None => {
+                // Create new user
+                let random_password = Uuid::new_v4().to_string();
+                let password_hash = hash_password(&random_password)?;
+                
+                let username_base = email.split('@').next().unwrap_or("user");
+                let mut username = username_base.to_string();
+                
+                // Ensure username is unique
+                if self.user_repo.username_exists(&username).await? {
+                    let uuid_simple = Uuid::new_v4().simple().to_string();
+                    username = format!("{}_{}", username, &uuid_simple[..6]);
+                }
+
+                self.user_repo
+                    .create(
+                        &email,
+                        &username,
+                        &password_hash,
+                        name.as_deref(),
+                        1, // Default grade
+                        None, // Age unknown
+                        &UserRole::Student,
+                    )
+                    .await?
+            }
+        };
+
+        // Generate tokens
+        let access_token = create_access_token(&user, &self.config)?;
+        let refresh_token = create_refresh_token(&user, &self.config)?;
+
+        // Store refresh token in Redis
+        let refresh_ttl = self.config.jwt_refresh_expires_in.as_secs();
+        self.token_repo
+            .store_refresh_token(user.id, &refresh_token, refresh_ttl)
+            .await?;
+
+        Ok(AuthResponse {
+            user: UserResponse::from(user),
+            access_token,
+            refresh_token,
+        })
     }
 }
 

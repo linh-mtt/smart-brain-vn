@@ -21,13 +21,27 @@ class AuthRemoteDatasource {
       return await _apiClient.post<AuthResponseModel>(
         ApiConstants.loginEndpoint,
         data: {'email': email, 'password': password},
-        fromJson: (json) =>
-            AuthResponseModel.fromJson(json as Map<String, dynamic>),
+        fromJson: _parseAuthResponse,
       );
     } on AppException {
       rethrow;
     } catch (e) {
       throw ServerException(message: 'Login failed: ${e.toString()}');
+    }
+  }
+
+  /// Logs in with Google ID Token.
+  Future<AuthResponseModel> googleLogin({required String idToken}) async {
+    try {
+      return await _apiClient.post<AuthResponseModel>(
+        ApiConstants.googleLoginEndpoint,
+        data: {'id_token': idToken},
+        fromJson: _parseAuthResponse,
+      );
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw ServerException(message: 'Google login failed: ${e.toString()}');
     }
   }
 
@@ -49,8 +63,7 @@ class AuthRemoteDatasource {
           'grade_level': gradeLevel,
           'age': age,
         },
-        fromJson: (json) =>
-            AuthResponseModel.fromJson(json as Map<String, dynamic>),
+        fromJson: _parseAuthResponse,
       );
     } on AppException {
       rethrow;
@@ -65,13 +78,33 @@ class AuthRemoteDatasource {
       return await _apiClient.post<AuthResponseModel>(
         ApiConstants.refreshTokenEndpoint,
         data: {'refresh_token': refreshToken},
-        fromJson: (json) =>
-            AuthResponseModel.fromJson(json as Map<String, dynamic>),
+        fromJson: _parseAuthResponse,
       );
     } on AppException {
       rethrow;
     } catch (e) {
       throw ServerException(message: 'Token refresh failed: ${e.toString()}');
+    }
+  }
+
+  AuthResponseModel _parseAuthResponse(dynamic json) {
+    // Defensive coding: Ensure refresh_token exists
+    if (json is Map<String, dynamic>) {
+      if (!json.containsKey('refresh_token') || json['refresh_token'] == null) {
+        // ignore: avoid_print
+        print(
+          '⚠️ Missing refresh_token in response. Defaulting to empty string.',
+        );
+        json['refresh_token'] = '';
+      }
+    }
+
+    try {
+      return AuthResponseModel.fromJson(json as Map<String, dynamic>);
+    } catch (e) {
+      // ignore: avoid_print
+      print('🐛 AuthRemoteDatasource Parse Error: $e');
+      rethrow;
     }
   }
 

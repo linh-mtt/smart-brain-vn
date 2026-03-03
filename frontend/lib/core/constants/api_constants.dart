@@ -18,7 +18,9 @@ abstract final class ApiConstants {
   /// WebSocket base URL (derived from baseUrl).
   /// Replaces http:// with ws:// and https:// with wss://.
   static String get wsBaseUrl {
-    final url = baseUrl.replaceFirst('http://', 'ws://').replaceFirst('https://', 'wss://');
+    final url = baseUrl
+        .replaceFirst('http://', 'ws://')
+        .replaceFirst('https://', 'wss://');
     return '$url/api/$apiVersion/ws';
   }
 
@@ -29,17 +31,18 @@ abstract final class ApiConstants {
   static String get apiBasePath => '$baseUrl/api/$apiVersion';
 
   /// Connection timeout in milliseconds.
-  static const int connectTimeout = 30000;
+  static const int connectTimeout = 10000;
 
   /// Receive timeout in milliseconds.
-  static const int receiveTimeout = 30000;
+  static const int receiveTimeout = 10000;
 
   /// Send timeout in milliseconds.
-  static const int sendTimeout = 30000;
+  static const int sendTimeout = 10000;
 
   // ─── Auth Endpoints ───────────────────────────────────────────────
 
   static const String loginEndpoint = '/auth/login';
+  static const String googleLoginEndpoint = '/auth/google';
   static const String registerEndpoint = '/auth/register';
   static const String refreshTokenEndpoint = '/auth/refresh-token';
   static const String logoutEndpoint = '/auth/logout';
@@ -83,11 +86,9 @@ abstract final class ApiConstants {
   static const String competitionResultEndpoint = '/competition/result';
 
   // ─── XP / Gamification Endpoints ────────────────────────────────
-  
+
   static const String xpProfileEndpoint = '/xp/profile';
   static const String xpThemesEndpoint = '/xp/themes';
-
-
 
   /// WebSocket reconnection delay in milliseconds.
   static const int wsReconnectDelay = 1000;

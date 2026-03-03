@@ -27,11 +27,13 @@ class HiveService {
   }
 
   /// Opens a Hive box with the given [name].
+  ///
+  /// Always opens as dynamic to prevent type conflicts, then casts.
   Future<Box<T>> openBox<T>(String name) async {
-    if (Hive.isBoxOpen(name)) {
-      return Hive.box<T>(name);
+    if (!Hive.isBoxOpen(name)) {
+      await Hive.openBox<dynamic>(name);
     }
-    return Hive.openBox<T>(name);
+    return Hive.box<dynamic>(name) as Box<T>;
   }
 
   /// Gets a value from the specified box.

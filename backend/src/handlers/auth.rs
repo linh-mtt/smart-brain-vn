@@ -4,7 +4,7 @@ use axum::extract::State;
 use axum::Json;
 
 use crate::auth::extractor::AuthUser;
-use crate::dto::auth::{AuthResponse, CreateUserRequest, LoginRequest, RefreshTokenRequest};
+use crate::dto::auth::{AuthResponse, CreateUserRequest, GoogleLoginRequest, LoginRequest, RefreshTokenRequest};
 use crate::error::{ApiResult, ErrorResponse};
 use crate::repository::token_repository::RedisTokenRepository;
 use crate::repository::user_repository::PgUserRepository;
@@ -28,6 +28,15 @@ pub async fn login(
     Json(body): Json<LoginRequest>,
 ) -> ApiResult<Json<AuthResponse>> {
     let response = auth_service.login(&body).await?;
+    Ok(Json(response))
+}
+
+#[utoipa::path(post, path = "/api/v1/auth/google", tag = "Authentication", request_body = GoogleLoginRequest, responses((status = 200, description = "Login successful", body = AuthResponse), (status = 401, description = "Invalid credentials", body = ErrorResponse)))]
+pub async fn google_login(
+    State(auth_service): State<Arc<ConcreteAuthService>>,
+    Json(body): Json<GoogleLoginRequest>,
+) -> ApiResult<Json<AuthResponse>> {
+    let response = auth_service.google_login(&body).await?;
     Ok(Json(response))
 }
 

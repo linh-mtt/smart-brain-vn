@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart' as google;
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
@@ -33,8 +34,8 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _emailController = TextEditingController(text: 'linh.le@mttjsc.com');
+  final _passwordController = TextEditingController(text: 'Linhlinh90');
   final _emailFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
 
@@ -50,6 +51,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
+    debugPrint('Starting login for: ${_emailController.text}');
+
     await ref
         .read(authNotifierProvider.notifier)
         .login(
@@ -57,15 +60,55 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           password: _passwordController.text,
         );
 
+    debugPrint('Login action completed. Mounted: $mounted');
+
     if (!mounted) return;
 
+    _checkAuthState();
+  }
+
+  Future<void> _handleGoogleLogin() async {
+    try {
+      final account = await google.GoogleSignIn.instance.authenticate();
+
+      final auth = await account.authentication;
+      final idToken = auth.idToken;
+
+      if (idToken == null) {
+        if (!mounted) return;
+        context.showErrorSnackBar('Failed to get Google ID token');
+        return;
+      }
+
+      await ref
+          .read(authNotifierProvider.notifier)
+          .googleLogin(idToken: idToken);
+
+      if (!mounted) return;
+      _checkAuthState();
+    } catch (e) {
+      if (!mounted) return;
+      // TODO: Handle cancellation specifically (GoogleSignInExceptionCode.canceled)
+      context.showErrorSnackBar('Google sign-in error: $e');
+    }
+  }
+
+  void _checkAuthState() {
     final authState = ref.read(authNotifierProvider);
+    debugPrint(
+      'Checking auth state. HasValue: ${authState.hasValue}, IsError: ${authState.hasError}, Value: ${authState.value}',
+    );
     if (authState.hasError) {
       final error = authState.error;
       final message = error is Failure
           ? error.displayMessage
           : 'Oops! Something went wrong. Let\'s try again!';
       context.showErrorSnackBar(message);
+    } else if (authState.value != null) {
+      debugPrint('Auth successful. Navigating to Home...');
+      context.go(RouteNames.homePath);
+    } else {
+      debugPrint('Auth state value is null despite no error.');
     }
   }
 
@@ -129,9 +172,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     // Social login buttons
                     SocialLoginButton(
                       provider: SocialProvider.google,
-                      onPressed: () {
-                        context.showSnackBar('Google sign-in coming soon! 🚀');
-                      },
+                      onPressed: _handleGoogleLogin,
                     ),
                     const Gap(12),
                     SocialLoginButton(
@@ -160,119 +201,124 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       children: [
         // Logo
         Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.25),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.25),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
               ),
-              child: const Center(
-                child: Text('🧮', style: TextStyle(fontSize: 40)),
-              ),
-            )
-            .animate()
-            .scale(
-              begin: const Offset(0.8, 0.8),
-              end: const Offset(1, 1),
-              duration: 600.ms,
-              curve: Curves.elasticOut,
-            )
-            .fadeIn(duration: 400.ms),
-
+            ],
+          ),
+          child: const Icon(
+            Icons.school_rounded,
+            size: 40,
+            color: Colors.white,
+          ),
+        ).animate().scale(duration: 600.ms, curve: Curves.elasticOut).fadeIn(),
         const Gap(24),
 
+        // Title
         Text(
-              'Welcome Back! 👋',
-              style: AppTextStyles.heading2,
-              textAlign: TextAlign.center,
-            )
-            .animate()
-            .fadeIn(duration: 400.ms, delay: 200.ms)
-            .slideY(begin: 0.2, end: 0),
-
+          'Welcome Back! 👋',
+          style: AppTextStyles.heading2,
+          textAlign: TextAlign.center,
+        ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
         const Gap(8),
 
+        // Subtitle
         Text(
-          'Sign in to continue your math adventure',
-          style: AppTextStyles.body2,
+          'Let\'s continue your math adventure',
+          style: AppTextStyles.body1.copyWith(color: AppColors.textSecondary),
           textAlign: TextAlign.center,
-        ).animate().fadeIn(duration: 400.ms, delay: 300.ms),
+        ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
       ],
     );
   }
 
   Widget _buildLoginButton(bool isLoading) {
-    return SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: isLoading ? null : _handleLogin,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 4,
-              shadowColor: AppColors.primary.withValues(alpha: 0.3),
-            ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: AppColors.primaryGradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isLoading ? null : _handleLogin,
+          borderRadius: BorderRadius.circular(16),
+          child: Center(
             child: isLoading
                 ? const SizedBox(
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(
                       color: Colors.white,
-                      strokeWidth: 3,
-                      strokeCap: StrokeCap.round,
+                      strokeWidth: 2.5,
                     ),
                   )
-                : Text('Let\'s Go! 🚀', style: AppTextStyles.buttonLarge),
+                : Text(
+                    'Login',
+                    style: AppTextStyles.button.copyWith(color: Colors.white),
+                  ),
           ),
-        )
-        .animate()
-        .fadeIn(duration: 400.ms, delay: 400.ms)
-        .slideY(begin: 0.2, end: 0);
+        ),
+      ),
+    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2, end: 0);
   }
 
   Widget _buildDivider() {
     return Row(
       children: [
-        Expanded(child: Divider(color: AppColors.divider)),
+        Expanded(
+          child: Divider(color: AppColors.textSecondary.withValues(alpha: 0.2)),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'or',
-            style: AppTextStyles.body2.copyWith(color: AppColors.textHint),
+            'OR',
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-        Expanded(child: Divider(color: AppColors.divider)),
+        Expanded(
+          child: Divider(color: AppColors.textSecondary.withValues(alpha: 0.2)),
+        ),
       ],
-    ).animate().fadeIn(duration: 300.ms, delay: 500.ms);
+    ).animate().fadeIn(delay: 500.ms);
   }
 
   Widget _buildRegisterLink() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Don\'t have an account? ', style: AppTextStyles.body2),
-        GestureDetector(
-          onTap: () => context.go(RouteNames.registerPath),
+        Text(
+          'New to SmartMath?',
+          style: AppTextStyles.body2.copyWith(color: AppColors.textSecondary),
+        ),
+        TextButton(
+          onPressed: () => context.pushNamed(RouteNames.register),
           child: Text(
-            'Register',
-            style: AppTextStyles.body1.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w700,
-            ),
+            'Create Account',
+            style: AppTextStyles.button.copyWith(color: AppColors.primary),
           ),
         ),
       ],
-    ).animate().fadeIn(duration: 300.ms, delay: 600.ms);
+    ).animate().fadeIn(delay: 600.ms);
   }
 }

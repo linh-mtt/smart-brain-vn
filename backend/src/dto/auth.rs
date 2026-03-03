@@ -41,6 +41,12 @@ pub struct LoginRequest {
     pub password: String,
 }
 
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct GoogleLoginRequest {
+    #[validate(length(min = 1, message = "ID Token is required"))]
+    pub id_token: String,
+}
+
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct RefreshTokenRequest {
     pub refresh_token: String,

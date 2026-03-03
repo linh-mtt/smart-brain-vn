@@ -19,7 +19,8 @@ class AuthLocalDatasource {
   Future<void> cacheUser(UserModel user) async {
     try {
       final jsonString = json.encode(user.toJson());
-      await _hiveService.putValue<String>(
+      // Explicitly use dynamic to match how the box was likely opened elsewhere or by default
+      await _hiveService.putValue<dynamic>(
         HiveService.userBox,
         _cachedUserKey,
         jsonString,
@@ -32,13 +33,15 @@ class AuthLocalDatasource {
   /// Retrieves the cached user model.
   Future<UserModel?> getCachedUser() async {
     try {
-      final jsonString = await _hiveService.getValue<String>(
+      // Retrieve as dynamic, then cast to String
+      final dynamic value = await _hiveService.getValue<dynamic>(
         HiveService.userBox,
         _cachedUserKey,
       );
 
-      if (jsonString == null) return null;
-
+      if (value == null) return null;
+      
+      final jsonString = value as String;
       final jsonMap = json.decode(jsonString) as Map<String, dynamic>;
       return UserModel.fromJson(jsonMap);
     } catch (e) {

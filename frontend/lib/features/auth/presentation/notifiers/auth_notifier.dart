@@ -64,6 +64,28 @@ class AuthNotifier extends AsyncNotifier<UserModel?> {
     );
   }
 
+  /// Logs in with Google ID Token.
+  Future<void> googleLogin({required String idToken}) async {
+    state = const AsyncValue.loading();
+
+    final result = await _repository.googleLogin(idToken: idToken);
+
+    state = result.fold(
+      onSuccess: (authResponse) => AsyncValue.data(
+        UserModel(
+          id: authResponse.user.id,
+          email: authResponse.user.email,
+          username: authResponse.user.username,
+          displayName: authResponse.user.displayName,
+          avatarUrl: authResponse.user.avatarUrl,
+          gradeLevel: authResponse.user.gradeLevel,
+          role: authResponse.user.role,
+        ),
+      ),
+      onFailure: (failure) => AsyncValue.error(failure, StackTrace.current),
+    );
+  }
+
   /// Registers a new user account.
   Future<void> register({
     required String email,

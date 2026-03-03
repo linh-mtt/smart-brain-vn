@@ -25,6 +25,11 @@ abstract class AuthRepository {
     required String password,
   });
 
+  /// Logs in with Google ID Token.
+  Future<Result<AuthResponse>> googleLogin({
+    required String idToken,
+  });
+
   /// Registers a new user account.
   Future<Result<AuthResponse>> register({
     required String email,

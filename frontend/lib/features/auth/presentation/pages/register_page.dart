@@ -257,7 +257,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             label: 'Confirm Password',
             hint: 'Type your password again',
             textInputAction: TextInputAction.done,
-            validator: Validators.confirmPassword(_passwordController.text),
+            validator: (value) =>
+                Validators.confirmPassword(_passwordController.text)(value),
             onFieldSubmitted: (_) => _nextStep(),
           ),
           const Gap(32),

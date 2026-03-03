@@ -188,9 +188,8 @@ sqlx migrate run
 # Start backend in development mode
 cargo run
 
-# Or with auto-reload (install cargo-watch first)
-cargo install cargo-watch
-cargo watch -x run
+# Or with auto-reload (Recommended)
+./dev.sh
 ```
 
 ### 5.3 Frontend

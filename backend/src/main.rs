@@ -61,6 +61,7 @@ impl utoipa::Modify for JwtSecurityAddon {
     paths(
         handlers::auth::register,
         handlers::auth::login,
+        handlers::auth::google_login,
         handlers::auth::refresh,
         handlers::auth::logout,
         handlers::user::get_me,
@@ -90,6 +91,7 @@ impl utoipa::Modify for JwtSecurityAddon {
     components(schemas(
         dto::auth::CreateUserRequest,
         dto::auth::LoginRequest,
+        dto::auth::GoogleLoginRequest,
         dto::auth::RefreshTokenRequest,
         dto::auth::UserResponse,
         dto::auth::AuthResponse,

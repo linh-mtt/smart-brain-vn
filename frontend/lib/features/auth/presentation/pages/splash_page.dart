@@ -25,15 +25,39 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   @override
   void initState() {
     super.initState();
-    _checkAuthAndNavigate();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuthAndNavigate();
+    });
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    // Re-run auth check on hot reload to facilitate development/debugging
+    // This allows developers to retry the splash logic without restarting the app
+    debugPrint('Hot reload detected in SplashPage - restarting auth check');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuthAndNavigate();
+    });
   }
 
   Future<void> _checkAuthAndNavigate() async {
-    // Let the splash animation play for at least 2.5 seconds
-    await Future.wait([
-      ref.read(authNotifierProvider.notifier).checkAuthStatus(),
-      Future<void>.delayed(const Duration(milliseconds: 2500)),
-    ]);
+    try {
+      // Let the splash animation play for at least 2.5 seconds
+      // We also add a timeout to prevent infinite hanging if something goes wrong
+      await Future.wait([
+        ref.read(authNotifierProvider.notifier).checkAuthStatus(),
+        Future<void>.delayed(const Duration(milliseconds: 2500)),
+      ]).timeout(
+        const Duration(seconds: 8),
+        onTimeout: () {
+          debugPrint('Splash initialization timed out');
+          return [];
+        },
+      );
+    } catch (e) {
+      debugPrint('Error during splash initialization: $e');
+    }
 
     if (!mounted) return;
 
