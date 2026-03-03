@@ -5,8 +5,10 @@ use sqlx::PgPool;
 use crate::auth::extractor::AuthUser;
 use crate::error::ApiResult;
 use crate::models::user::{ProgressSummary, TopicProgressResponse};
+use crate::error::ErrorResponse;
 use crate::services::gamification;
 
+#[utoipa::path(get, path = "/api/v1/progress/summary", tag = "Progress", responses((status = 200, description = "Progress summary", body = ProgressSummary), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn summary(
     auth: AuthUser,
     State(pool): State<PgPool>,
@@ -76,6 +78,7 @@ pub async fn summary(
     }))
 }
 
+#[utoipa::path(get, path = "/api/v1/progress/topic/{topic}", tag = "Progress", params(("topic" = String, Path, description = "Topic name")), responses((status = 200, description = "Topic progress", body = TopicProgressResponse), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn topic_progress(
     auth: AuthUser,
     State(pool): State<PgPool>,

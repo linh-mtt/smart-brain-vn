@@ -1,10 +1,12 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
+use utoipa::ToSchema;
+use utoipa::IntoParams;
 
 // ─── Request DTOs ────────────────────────────────────────────────────────────
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema, IntoParams)]
 pub struct GetQuestionsRequest {
     pub topic: String,
 
@@ -12,7 +14,7 @@ pub struct GetQuestionsRequest {
     pub count: Option<usize>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct PracticeSubmitRequest {
     pub question_id: Uuid,
     pub topic: String,
@@ -25,7 +27,7 @@ pub struct PracticeSubmitRequest {
 
 // ─── Response DTOs ───────────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, ToSchema)]
 pub struct AdaptiveQuestionResponse {
     pub id: Uuid,
     pub question_text: String,
@@ -36,7 +38,7 @@ pub struct AdaptiveQuestionResponse {
     pub difficulty_level: i32,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct PracticeFeedbackResponse {
     pub is_correct: bool,
     pub correct_answer: f64,

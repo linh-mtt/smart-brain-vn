@@ -1,10 +1,11 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use utoipa::ToSchema;
 
 // ─── XP Profile Response ────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct XpProfileResponse {
     pub user_id: Uuid,
     pub total_xp: i64,
@@ -18,7 +19,7 @@ pub struct XpProfileResponse {
 
 // ─── XP Award Result ────────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, ToSchema)]
 pub struct XpAwardResponse {
     pub xp_awarded: i32,
     pub total_xp: i64,
@@ -32,7 +33,7 @@ pub struct XpAwardResponse {
 
 // ─── Achievement DTO ────────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, ToSchema)]
 pub struct UnlockedAchievementDto {
     pub id: Uuid,
     pub name: String,
@@ -44,7 +45,7 @@ pub struct UnlockedAchievementDto {
 
 // ─── Theme Response ─────────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, ToSchema)]
 pub struct ThemeResponse {
     pub id: Uuid,
     pub name: String,
@@ -60,7 +61,7 @@ pub struct ThemeResponse {
 
 // ─── Theme List Response ────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ThemeListResponse {
     pub themes: Vec<ThemeResponse>,
     pub active_theme_id: Option<Uuid>,
@@ -68,7 +69,7 @@ pub struct ThemeListResponse {
 
 // ─── Activate Theme Request ─────────────────────────────────────────────────
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 #[allow(dead_code)]
 pub struct ActivateThemeRequest {
     pub theme_id: Uuid,

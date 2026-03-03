@@ -5,7 +5,9 @@ use sqlx::PgPool;
 use crate::auth::extractor::AuthUser;
 use crate::error::ApiResult;
 use crate::models::user::AchievementResponse;
+use crate::error::ErrorResponse;
 
+#[utoipa::path(get, path = "/api/v1/achievements", tag = "Achievements", responses((status = 200, description = "List of achievements", body = Vec<AchievementResponse>), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn list_achievements(
     auth: AuthUser,
     State(pool): State<PgPool>,

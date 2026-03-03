@@ -2,10 +2,12 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
+use utoipa::ToSchema;
+use utoipa::IntoParams;
 
 // ─── User Role Enum ──────────────────────────────────────────────────────────
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, sqlx::Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, sqlx::Type, ToSchema)]
 #[sqlx(type_name = "user_role", rename_all = "lowercase")]
 #[serde(rename_all = "lowercase")]
 pub enum UserRole {
@@ -54,7 +56,7 @@ pub struct User {
     pub current_level: i32,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct UpdateProfileRequest {
     #[validate(length(max = 255, message = "Display name too long"))]
     pub display_name: Option<String>,
@@ -68,7 +70,7 @@ pub struct UpdateProfileRequest {
 
 // ─── Exercise Models ─────────────────────────────────────────────────────────
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct GenerateExerciseRequest {
     pub topic: String,
     pub difficulty: String,
@@ -76,14 +78,14 @@ pub struct GenerateExerciseRequest {
     pub count: usize,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct SubmitAnswerRequest {
     pub exercise_id: Uuid,
     pub answer: f64,
     pub time_taken_ms: Option<i32>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ExerciseResponse {
     pub id: Uuid,
     pub question_text: String,
@@ -92,7 +94,7 @@ pub struct ExerciseResponse {
     pub topic: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct AnswerFeedback {
     pub is_correct: bool,
     pub correct_answer: f64,
@@ -102,7 +104,7 @@ pub struct AnswerFeedback {
 
 // ─── Progress Models ─────────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, sqlx::FromRow, ToSchema)]
 pub struct ProgressSummary {
     pub total_points: i64,
     pub current_streak: i32,
@@ -113,7 +115,7 @@ pub struct ProgressSummary {
     pub xp_to_next_level: i64,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct TopicProgressResponse {
     pub topic: String,
     pub mastery_score: f64,
@@ -124,7 +126,7 @@ pub struct TopicProgressResponse {
 
 // ─── Achievement Models ──────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, sqlx::FromRow, ToSchema)]
 pub struct AchievementResponse {
     pub id: Uuid,
     pub name: String,
@@ -137,7 +139,7 @@ pub struct AchievementResponse {
 
 // ─── Parent Models ───────────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ChildSummary {
     pub child_id: Uuid,
     pub username: String,
@@ -148,7 +150,7 @@ pub struct ChildSummary {
     pub current_streak: i32,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ChildProgress {
     pub child: ChildSummary,
     pub topic_mastery: Vec<TopicProgressResponse>,
@@ -156,14 +158,15 @@ pub struct ChildProgress {
     pub recent_activity: Vec<RecentExercise>,
 }
 
-#[derive(Debug, Serialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, sqlx::FromRow, ToSchema)]
 pub struct DailyGoalResponse {
     pub daily_exercise_target: i32,
     pub daily_time_target_minutes: i32,
+    #[schema(value_type = Object)]
     pub active_topics: serde_json::Value,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct UpdateGoalsRequest {
     #[validate(range(min = 1, max = 100, message = "Target must be 1-100"))]
     pub daily_exercise_target: Option<i32>,
@@ -172,7 +175,7 @@ pub struct UpdateGoalsRequest {
     pub active_topics: Option<Vec<String>>,
 }
 
-#[derive(Debug, Serialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, sqlx::FromRow, ToSchema)]
 pub struct RecentExercise {
     pub id: Uuid,
     pub topic: String,
@@ -184,7 +187,7 @@ pub struct RecentExercise {
 
 // ─── Pagination ──────────────────────────────────────────────────────────────
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema, IntoParams)]
 pub struct PaginationParams {
     pub page: Option<i64>,
     pub per_page: Option<i64>,

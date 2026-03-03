@@ -13,12 +13,14 @@ use crate::models::user::{
     AnswerFeedback, ExerciseResponse, GenerateExerciseRequest, PaginationParams,
     SubmitAnswerRequest,
 };
+use crate::error::ErrorResponse;
 use crate::services::gamification;
 use crate::services::math_engine::{self, Difficulty, MathTopic};
 use crate::state::RedisPool;
 use crate::ws::broadcast_event;
 use crate::handlers::leaderboard::ConcreteLeaderboardService;
 
+#[utoipa::path(post, path = "/api/v1/exercises/generate", tag = "Exercises", request_body = GenerateExerciseRequest, responses((status = 200, description = "Generated exercises", body = Vec<ExerciseResponse>), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn generate(
     auth: AuthUser,
     State(redis): State<RedisPool>,
@@ -89,6 +91,7 @@ pub async fn generate(
     Ok(Json(responses))
 }
 
+#[utoipa::path(post, path = "/api/v1/exercises/submit", tag = "Exercises", request_body = SubmitAnswerRequest, responses((status = 200, description = "Answer feedback", body = AnswerFeedback), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn submit(
     auth: AuthUser,
     State(pool): State<PgPool>,
@@ -193,6 +196,7 @@ pub async fn submit(
     Ok(Json(feedback))
 }
 
+#[utoipa::path(get, path = "/api/v1/exercises/history", tag = "Exercises", params(PaginationParams), responses((status = 200, description = "Exercise history"), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn history(
     auth: AuthUser,
     State(pool): State<PgPool>,

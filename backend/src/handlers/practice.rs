@@ -11,6 +11,7 @@ use crate::dto::practice::{
     AdaptiveQuestionResponse, GetQuestionsRequest, PracticeFeedbackResponse, PracticeSubmitRequest,
 };
 use crate::error::{ApiError, ApiResult};
+use crate::error::ErrorResponse;
 use crate::repository::question_repository::PgQuestionRepository;
 use crate::repository::skill_repository::PgSkillRepository;
 use crate::services::adaptive_engine::AdaptiveEngine;
@@ -22,6 +23,7 @@ pub type ConcreteAdaptiveEngine = AdaptiveEngine<PgQuestionRepository, PgSkillRe
 
 // ─── GET /practice/questions ─────────────────────────────────────────────────
 
+#[utoipa::path(get, path = "/api/v1/practice/questions", tag = "Practice", params(GetQuestionsRequest), responses((status = 200, description = "Adaptive questions", body = Vec<AdaptiveQuestionResponse>), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn get_questions(
     auth: AuthUser,
     State(engine): State<Arc<ConcreteAdaptiveEngine>>,
@@ -60,6 +62,7 @@ pub async fn get_questions(
 
 // ─── POST /practice/submit ───────────────────────────────────────────────────
 
+#[utoipa::path(post, path = "/api/v1/practice/submit", tag = "Practice", request_body = PracticeSubmitRequest, responses((status = 200, description = "Practice feedback", body = PracticeFeedbackResponse), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn submit_practice(
     auth: AuthUser,
     State(engine): State<Arc<ConcreteAdaptiveEngine>>,

@@ -13,6 +13,7 @@ use crate::dto::session::{
     StartSessionResponse,
 };
 use crate::error::{ApiError, ApiResult};
+use crate::error::ErrorResponse;
 use crate::repository::question_repository::PgQuestionRepository;
 use crate::repository::session_repository::PgSessionRepository;
 use crate::repository::skill_repository::PgSkillRepository;
@@ -26,6 +27,7 @@ pub type ConcreteSessionService =
 
 // ─── POST /practice/start ───────────────────────────────────────────────────
 
+#[utoipa::path(post, path = "/api/v1/practice/start", tag = "Practice Sessions", request_body = StartSessionRequest, responses((status = 200, description = "Session started", body = StartSessionResponse), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn start_session(
     auth: AuthUser,
     State(service): State<Arc<ConcreteSessionService>>,
@@ -62,6 +64,7 @@ pub async fn start_session(
 
 // ─── POST /practice/answer ──────────────────────────────────────────────────
 
+#[utoipa::path(post, path = "/api/v1/practice/answer", tag = "Practice Sessions", request_body = SessionSubmitRequest, responses((status = 200, description = "Answer result", body = SessionSubmitResponse), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn submit_answer(
     auth: AuthUser,
     State(service): State<Arc<ConcreteSessionService>>,
@@ -146,6 +149,7 @@ pub async fn submit_answer(
 
 // ─── GET /practice/result/:id ───────────────────────────────────────────────
 
+#[utoipa::path(get, path = "/api/v1/practice/result/{id}", tag = "Practice Sessions", params(("id" = Uuid, Path, description = "Session ID")), responses((status = 200, description = "Session result", body = SessionResultResponse), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn get_result(
     auth: AuthUser,
     State(service): State<Arc<ConcreteSessionService>>,

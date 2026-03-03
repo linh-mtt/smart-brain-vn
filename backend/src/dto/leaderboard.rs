@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use utoipa::ToSchema;
+use utoipa::IntoParams;
 
 // ─── Request DTOs ───────────────────────────────────────────────────────────
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema, IntoParams)]
 pub struct LeaderboardQueryParams {
     /// Period filter: daily, weekly, all_time (default: all_time)
     pub period: Option<String>,
@@ -15,7 +17,7 @@ pub struct LeaderboardQueryParams {
 
 // ─── Response DTOs ──────────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct LeaderboardResponse {
     pub entries: Vec<LeaderboardEntryDto>,
     pub total_count: i64,
@@ -26,7 +28,7 @@ pub struct LeaderboardResponse {
     pub my_rank: Option<MyRankDto>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct LeaderboardEntryDto {
     pub rank: i64,
     pub user_id: Uuid,
@@ -35,7 +37,7 @@ pub struct LeaderboardEntryDto {
     pub total_points: i64,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct MyRankDto {
     pub rank: i64,
     pub total_points: i64,

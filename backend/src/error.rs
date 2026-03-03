@@ -1,6 +1,8 @@
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
+use serde::Serialize;
 use serde_json::json;
+use utoipa::ToSchema;
 
 pub type ApiResult<T> = Result<T, ApiError>;
 
@@ -108,4 +110,10 @@ impl From<argon2::password_hash::Error> for ApiError {
         tracing::error!("Password hashing error: {:?}", err);
         ApiError::InternalError("Password processing error".to_string())
     }
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ErrorResponse {
+    pub error: String,
+    pub message: String,
 }

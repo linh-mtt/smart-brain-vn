@@ -7,7 +7,9 @@ use crate::auth::extractor::AuthUser;
 use crate::error::{ApiError, ApiResult};
 use crate::dto::auth::UserResponse;
 use crate::models::user::{UpdateProfileRequest, User};
+use crate::error::ErrorResponse;
 
+#[utoipa::path(get, path = "/api/v1/users/me", tag = "Users", responses((status = 200, description = "Current user profile", body = UserResponse), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn get_me(
     auth: AuthUser,
     State(pool): State<PgPool>,
@@ -21,6 +23,7 @@ pub async fn get_me(
     Ok(Json(UserResponse::from(user)))
 }
 
+#[utoipa::path(put, path = "/api/v1/users/me", tag = "Users", request_body = UpdateProfileRequest, responses((status = 200, description = "Profile updated", body = UserResponse), (status = 401, description = "Unauthorized", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn update_me(
     auth: AuthUser,
     State(pool): State<PgPool>,

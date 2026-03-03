@@ -22,9 +22,131 @@ use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::EnvFilter;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::Config;
 use crate::state::AppState;
+
+// ─── OpenAPI Documentation ────────────────────────────────────────────────────
+
+struct JwtSecurityAddon;
+
+impl utoipa::Modify for JwtSecurityAddon {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        if let Some(components) = openapi.components.as_mut() {
+            components.add_security_scheme(
+                "bearer_jwt",
+                utoipa::openapi::security::SecurityScheme::Http(
+                    utoipa::openapi::security::HttpBuilder::new()
+                        .scheme(utoipa::openapi::security::HttpAuthScheme::Bearer)
+                        .bearer_format("JWT")
+                        .build(),
+                ),
+            );
+        }
+    }
+}
+
+#[derive(OpenApi)]
+#[openapi(
+    info(
+        title = "SmartMath Kids API",
+        version = "1.0.0",
+        description = "Interactive math learning platform for children — REST API documentation",
+        contact(name = "SmartMath Team"),
+        license(name = "MIT")
+    ),
+    modifiers(&JwtSecurityAddon),
+    paths(
+        handlers::auth::register,
+        handlers::auth::login,
+        handlers::auth::refresh,
+        handlers::auth::logout,
+        handlers::user::get_me,
+        handlers::user::update_me,
+        handlers::exercise::generate,
+        handlers::exercise::submit,
+        handlers::exercise::history,
+        handlers::progress::summary,
+        handlers::progress::topic_progress,
+        handlers::achievement::list_achievements,
+        handlers::leaderboard::get_leaderboard,
+        handlers::leaderboard::get_my_rank,
+        handlers::practice::get_questions,
+        handlers::practice::submit_practice,
+        handlers::session::start_session,
+        handlers::session::submit_answer,
+        handlers::session::get_result,
+        handlers::parent::list_children,
+        handlers::parent::child_progress,
+        handlers::parent::update_goals,
+        handlers::xp::get_xp_profile,
+        handlers::xp::get_themes,
+        handlers::xp::unlock_theme,
+        handlers::xp::activate_theme,
+        handlers::health::health_check,
+    ),
+    components(schemas(
+        dto::auth::CreateUserRequest,
+        dto::auth::LoginRequest,
+        dto::auth::RefreshTokenRequest,
+        dto::auth::UserResponse,
+        dto::auth::AuthResponse,
+        dto::auth::TokenClaims,
+        dto::xp::XpProfileResponse,
+        dto::xp::XpAwardResponse,
+        dto::xp::UnlockedAchievementDto,
+        dto::xp::ThemeResponse,
+        dto::xp::ThemeListResponse,
+        dto::xp::ActivateThemeRequest,
+        dto::leaderboard::LeaderboardQueryParams,
+        dto::leaderboard::LeaderboardResponse,
+        dto::leaderboard::LeaderboardEntryDto,
+        dto::leaderboard::MyRankDto,
+        dto::session::StartSessionRequest,
+        dto::session::SessionSubmitRequest,
+        dto::session::StartSessionResponse,
+        dto::session::SessionSubmitResponse,
+        dto::session::SessionProgress,
+        dto::session::SessionResultResponse,
+        dto::session::ResultDetail,
+        dto::practice::GetQuestionsRequest,
+        dto::practice::PracticeSubmitRequest,
+        dto::practice::AdaptiveQuestionResponse,
+        dto::practice::PracticeFeedbackResponse,
+        models::user::UserRole,
+        models::user::UpdateProfileRequest,
+        models::user::GenerateExerciseRequest,
+        models::user::SubmitAnswerRequest,
+        models::user::ExerciseResponse,
+        models::user::AnswerFeedback,
+        models::user::ProgressSummary,
+        models::user::TopicProgressResponse,
+        models::user::AchievementResponse,
+        models::user::ChildSummary,
+        models::user::ChildProgress,
+        models::user::DailyGoalResponse,
+        models::user::UpdateGoalsRequest,
+        models::user::RecentExercise,
+        models::user::PaginationParams,
+        error::ErrorResponse,
+    )),
+    tags(
+        (name = "Health", description = "Service health checks"),
+        (name = "Authentication", description = "User registration, login, token refresh, logout"),
+        (name = "Users", description = "User profile management"),
+        (name = "Exercises", description = "Math exercise generation and submission"),
+        (name = "Progress", description = "Learning progress and topic mastery"),
+        (name = "Achievements", description = "Achievement tracking"),
+        (name = "Leaderboard", description = "Competition rankings"),
+        (name = "Practice", description = "Adaptive practice engine"),
+        (name = "Practice Sessions", description = "Session-based practice with combos"),
+        (name = "Parent", description = "Parental oversight and goal setting"),
+        (name = "XP & Gamification", description = "XP, levels, themes, and rewards"),
+    )
+)]
+struct ApiDoc;
 
 #[tokio::main]
 async fn main() {
@@ -147,6 +269,10 @@ async fn main() {
     // Build router
     let app = axum::Router::new()
         .nest("/api/v1", handlers::api_router(state.clone()))
+        .merge(
+            SwaggerUi::new("/docs/backend-apis")
+                .url("/api-docs/openapi.json", ApiDoc::openapi())
+        )
         .layer(compression)
         .layer(cors)
         .layer(trace)

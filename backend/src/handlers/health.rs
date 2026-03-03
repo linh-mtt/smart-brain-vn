@@ -5,6 +5,7 @@ use sqlx::PgPool;
 use crate::error::ApiResult;
 use crate::state::RedisPool;
 
+#[utoipa::path(get, path = "/api/v1/health", tag = "Health", responses((status = 200, description = "Health check status")))]
 pub async fn health_check(
     State(pool): State<PgPool>,
     State(redis): State<RedisPool>,

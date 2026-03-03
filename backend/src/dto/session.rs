@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
+use utoipa::ToSchema;
 
 // ─── Request DTOs ────────────────────────────────────────────────────────────
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct StartSessionRequest {
     pub topic: String,
 
@@ -12,7 +13,7 @@ pub struct StartSessionRequest {
     pub question_count: Option<usize>,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct SessionSubmitRequest {
     pub session_id: Uuid,
     pub question_id: Uuid,
@@ -31,7 +32,7 @@ pub struct SessionSubmitRequest {
 
 // ─── Response DTOs ───────────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct StartSessionResponse {
     pub session_id: Uuid,
     pub topic: String,
@@ -39,7 +40,7 @@ pub struct StartSessionResponse {
     pub questions: Vec<super::practice::AdaptiveQuestionResponse>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct SessionSubmitResponse {
     pub is_correct: bool,
     pub correct_answer: f64,
@@ -54,7 +55,7 @@ pub struct SessionSubmitResponse {
     pub session_progress: SessionProgress,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct SessionProgress {
     pub total_questions: i32,
     pub correct_count: i32,
@@ -63,7 +64,7 @@ pub struct SessionProgress {
     pub accuracy: f64,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct SessionResultResponse {
     pub session_id: Uuid,
     pub user_id: Uuid,
@@ -82,7 +83,7 @@ pub struct SessionResultResponse {
     pub results: Vec<ResultDetail>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ResultDetail {
     pub id: Uuid,
     pub question_text: String,

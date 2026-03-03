@@ -10,6 +10,7 @@ use crate::models::user::{
     ChildProgress, ChildSummary, DailyGoalResponse, RecentExercise, TopicProgressResponse,
     UpdateGoalsRequest, UserRole,
 };
+use crate::error::ErrorResponse;
 
 fn require_parent(auth: &AuthUser) -> ApiResult<()> {
     if auth.role != UserRole::Parent && auth.role != UserRole::Admin {
@@ -18,6 +19,7 @@ fn require_parent(auth: &AuthUser) -> ApiResult<()> {
     Ok(())
 }
 
+#[utoipa::path(get, path = "/api/v1/parent/children", tag = "Parent", responses((status = 200, description = "List of children", body = Vec<ChildSummary>), (status = 401, description = "Unauthorized", body = ErrorResponse), (status = 403, description = "Not a parent", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn list_children(
     auth: AuthUser,
     State(pool): State<PgPool>,
@@ -73,6 +75,7 @@ pub async fn list_children(
     Ok(Json(result))
 }
 
+#[utoipa::path(get, path = "/api/v1/parent/child/{child_id}/progress", tag = "Parent", params(("child_id" = Uuid, Path, description = "Child user ID")), responses((status = 200, description = "Child progress", body = ChildProgress), (status = 401, description = "Unauthorized", body = ErrorResponse), (status = 403, description = "Not a parent", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn child_progress(
     auth: AuthUser,
     State(pool): State<PgPool>,
@@ -191,6 +194,7 @@ pub async fn child_progress(
     }))
 }
 
+#[utoipa::path(put, path = "/api/v1/parent/child/{child_id}/goals", tag = "Parent", params(("child_id" = Uuid, Path, description = "Child user ID")), request_body = UpdateGoalsRequest, responses((status = 200, description = "Goals updated"), (status = 401, description = "Unauthorized", body = ErrorResponse), (status = 403, description = "Not a parent", body = ErrorResponse)), security(("bearer_jwt" = [])))]
 pub async fn update_goals(
     auth: AuthUser,
     State(pool): State<PgPool>,
