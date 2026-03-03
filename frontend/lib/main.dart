@@ -4,9 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'core/storage/hive_service.dart';
+import 'config/env_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment configuration (.env files with priority ordering)
+  await EnvConfig.load();
 
   // Lock orientation to portrait for kid-friendly experience
   await SystemChrome.setPreferredOrientations([

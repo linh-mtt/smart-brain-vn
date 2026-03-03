@@ -81,7 +81,7 @@ cat .env
 | `JWT_ACCESS_TOKEN_EXPIRES_IN` | `15m` | Thời gian sống (TTL) của Access token |
 | `JWT_REFRESH_TOKEN_EXPIRES_IN` | `7d` | Thời gian sống (TTL) của Refresh token |
 | `RUST_LOG` | `info,smartmath_backend=debug` | Bộ lọc cấp độ log |
-| `ENVIRONMENT` | `development` | Môi trường thực thi |
+| `APP_ENV` | `development` | Môi trường ứng dụng |
 | `FRONTEND_PORT` | `8080` | Cổng Frontend web |
 | `API_BASE_URL` | `http://localhost:3000/api/v1` | URL API cơ bản cho frontend |
 | `WS_URL` | `ws://localhost:3000/ws` | URL WebSocket cho frontend |

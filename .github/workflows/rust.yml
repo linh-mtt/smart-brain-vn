@@ -85,7 +85,7 @@ jobs:
       DATABASE_URL: postgres://smartmath_test:smartmath_test_pass@localhost:5432/smartmath_test
       REDIS_URL: redis://localhost:6379
       JWT_SECRET: test_jwt_secret_minimum_32_characters_long
-      ENVIRONMENT: test
+      APP_ENV: test
     steps:
       - uses: actions/checkout@v4
 

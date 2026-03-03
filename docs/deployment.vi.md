@@ -164,7 +164,7 @@ JWT_SECRET=<STRONG_RANDOM_SECRET_MINIMUM_64_CHARS>
 JWT_ACCESS_TOKEN_EXPIRES_IN=15m
 JWT_REFRESH_TOKEN_EXPIRES_IN=7d
 RUST_LOG=info,smartmath_backend=info
-ENVIRONMENT=production
+APP_ENV=production
 
 # Frontend
 FRONTEND_PORT=80
@@ -197,7 +197,7 @@ openssl rand -base64 24
 | `JWT_ACCESS_TOKEN_EXPIRES_IN` | Không | Không | `15m` | Thời gian sống của access token |
 | `JWT_REFRESH_TOKEN_EXPIRES_IN` | Không | Không | `7d` | Thời gian sống của refresh token |
 | `RUST_LOG` | Không | Không | `info` | Bộ lọc cấp độ log |
-| `ENVIRONMENT` | Không | Không | `development` | Môi trường thực thi |
+| `APP_ENV` | Không | Không | `development` | Môi trường ứng dụng |
 
 > **Quan trọng**: Không bao giờ sử dụng mật khẩu mặc định trong production. Không bao giờ commit các tệp `.env` vào hệ thống quản lý phiên bản (git).
 
@@ -591,7 +591,7 @@ strip = true        # Loại bỏ các ký hiệu debug
 - [ ] **JWT_SECRET**: Tối thiểu 64 ký tự, được tạo ngẫu nhiên
 - [ ] **POSTGRES_PASSWORD**: Mạnh, được tạo ngẫu nhiên
 - [ ] **REDIS_PASSWORD**: Mạnh, được tạo ngẫu nhiên
-- [ ] **ENVIRONMENT**: Thiết lập là `production`
+- [ ] **APP_ENV**: Thiết lập là `production`
 - [ ] **RUST_LOG**: Thiết lập là `info` (không để `debug`)
 - [ ] **CORS origins**: Giới hạn trong tên miền của bạn (không để `*`)
 - [ ] Quyền hạn tệp `.env`: `chmod 600 .env`

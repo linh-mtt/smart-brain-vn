@@ -60,63 +60,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Rust Backend API
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: smartmath-backend
-    environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-smartmath}:${POSTGRES_PASSWORD:-smartmath_dev_pass}@postgres:5432/${POSTGRES_DB:-smartmath}
-      REDIS_URL: redis://default:${REDIS_PASSWORD:-smartmath_redis_dev}@dragonfly:6379
-      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production_minimum_32_chars}
-      JWT_ACCESS_TOKEN_EXPIRES_IN: ${JWT_ACCESS_TOKEN_EXPIRES_IN:-15m}
-      JWT_REFRESH_TOKEN_EXPIRES_IN: ${JWT_REFRESH_TOKEN_EXPIRES_IN:-7d}
-      SERVER_HOST: 0.0.0.0
-      SERVER_PORT: 3000
-      RUST_LOG: ${RUST_LOG:-info,smartmath_backend=debug}
-      APP_ENV: ${APP_ENV:-development}
-    ports:
-      - "${BACKEND_PORT:-3000}:3000"
-    networks:
-      - smartmath-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-      dragonfly:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  # Flutter Web Frontend
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: smartmath-frontend
-    ports:
-      - "${FRONTEND_PORT:-8080}:80"
-    networks:
-      - smartmath-network
-    depends_on:
-      - backend
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
 volumes:
   postgres-data:
     driver: local

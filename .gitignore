@@ -1,6 +1,27 @@
-# Environment
+# Environment - Multi-env dotenv support
+# Each module loads .env files from its own directory only.
+# Priority: .env.[mode].local > .env.[mode] > .env.local > .env
+#
+# Root .env is for Docker Compose infrastructure variables only.
+# Local override files (.env.local, .env.*.local) are git-ignored.
+
+# Root (Docker infra)
 .env
+.env.local
+.env.*.local
 !.env.example
+
+# Backend module
+backend/.env
+backend/.env.local
+backend/.env.*.local
+!backend/.env.example
+
+# Frontend module
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+!frontend/.env.example
 
 # IDE
 .idea/

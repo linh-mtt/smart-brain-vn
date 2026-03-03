@@ -81,7 +81,7 @@ cat .env
 | `JWT_ACCESS_TOKEN_EXPIRES_IN` | `15m` | Access token TTL |
 | `JWT_REFRESH_TOKEN_EXPIRES_IN` | `7d` | Refresh token TTL |
 | `RUST_LOG` | `info,smartmath_backend=debug` | Log level filter |
-| `ENVIRONMENT` | `development` | Runtime environment |
+| `APP_ENV` | `development` | Application environment |
 | `FRONTEND_PORT` | `8080` | Frontend web port |
 | `API_BASE_URL` | `http://localhost:3000/api/v1` | API base URL for frontend |
 | `WS_URL` | `ws://localhost:3000/ws` | WebSocket URL for frontend |

@@ -1,13 +1,19 @@
+import '../../config/env_config.dart';
+
 /// API configuration constants.
 ///
 /// All endpoint paths and configuration for communicating with the backend.
 abstract final class ApiConstants {
   /// Base URL for the API server.
-  /// Override via environment variable or String.fromEnvironment.
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://localhost:3000',
-  );
+  /// Override via .env file (highest priority) or String.fromEnvironment.
+  static String get baseUrl {
+    final envUrl = EnvConfig.maybeGet('API_BASE_URL');
+    if (envUrl != null && envUrl.isNotEmpty) return envUrl;
+    return const String.fromEnvironment(
+      'API_BASE_URL',
+      defaultValue: 'http://localhost:3000',
+    );
+  }
 
   /// WebSocket base URL (derived from baseUrl).
   /// Replaces http:// with ws:// and https:// with wss://.

@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::time::Duration;
 
 #[derive(Debug, Clone)]
@@ -31,7 +32,7 @@ impl std::fmt::Display for Environment {
 
 impl Config {
     pub fn from_env() -> Self {
-        dotenvy::dotenv().ok();
+        load_dotenv_files();
 
         let database_url = env_var("DATABASE_URL");
         let redis_url = env_var_or("REDIS_URL", "redis://127.0.0.1:6379");
@@ -44,7 +45,7 @@ impl Config {
         let server_port = env_var_or("SERVER_PORT", "8080")
             .parse::<u16>()
             .expect("SERVER_PORT must be a valid u16");
-        let environment = match env_var_or("ENVIRONMENT", "dev").as_str() {
+        let environment = match env_var_or("APP_ENV", "dev").as_str() {
             "staging" => Environment::Staging,
             "prod" | "production" => Environment::Prod,
             _ => Environment::Dev,
@@ -110,4 +111,36 @@ fn parse_duration(s: &str) -> Duration {
             unit
         ),
     }
+}
+
+
+fn load_dotenv_files() {
+    // Resolve the backend module directory at compile time.
+    // This ensures .env files are ALWAYS loaded from the backend/ folder,
+    // regardless of the process's current working directory.
+    let module_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+
+    // Determine the app mode from process env (before loading any .env files)
+    let mode = std::env::var("APP_ENV")
+        .unwrap_or_else(|_| "development".to_string());
+
+    // Load in highest-to-lowest priority order.
+    // dotenvy::from_path() does NOT override already-set vars,
+    // so the first file to set a var "wins".
+    let files = vec![
+        format!(".env.{}.local", mode),    // Highest priority
+        format!(".env.{}", mode),           // Mode-specific
+        ".env.local".to_string(),           // Local overrides
+        ".env".to_string(),                 // Base defaults (lowest)
+    ];
+
+    for file in &files {
+        let path = module_dir.join(file);
+        match dotenvy::from_path(&path) {
+            Ok(_) => tracing::info!("Loaded env file: {}", path.display()),
+            Err(_) => tracing::debug!("Env file not found (skipped): {}", path.display()),
+        }
+    }
+
+    tracing::info!("Environment mode: {} (module dir: {})", mode, module_dir.display());
 }

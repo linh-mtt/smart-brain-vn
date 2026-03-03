@@ -164,7 +164,7 @@ JWT_SECRET=<STRONG_RANDOM_SECRET_MINIMUM_64_CHARS>
 JWT_ACCESS_TOKEN_EXPIRES_IN=15m
 JWT_REFRESH_TOKEN_EXPIRES_IN=7d
 RUST_LOG=info,smartmath_backend=info
-ENVIRONMENT=production
+APP_ENV=production
 
 # Frontend
 FRONTEND_PORT=80
@@ -197,7 +197,7 @@ openssl rand -base64 24
 | `JWT_ACCESS_TOKEN_EXPIRES_IN` | No | No | `15m` | Access token lifetime |
 | `JWT_REFRESH_TOKEN_EXPIRES_IN` | No | No | `7d` | Refresh token lifetime |
 | `RUST_LOG` | No | No | `info` | Log level filter |
-| `ENVIRONMENT` | No | No | `development` | Runtime environment |
+| `APP_ENV` | No | No | `development` | Application environment |
 
 > **Critical**: Never use default passwords in production. Never commit `.env` files to version control.
 
@@ -591,7 +591,7 @@ strip = true        # Strip debug symbols
 - [ ] **JWT_SECRET**: Minimum 64 characters, randomly generated
 - [ ] **POSTGRES_PASSWORD**: Strong, randomly generated
 - [ ] **REDIS_PASSWORD**: Strong, randomly generated
-- [ ] **ENVIRONMENT**: Set to `production`
+- [ ] **APP_ENV**: Set to `production`
 - [ ] **RUST_LOG**: Set to `info` (not `debug`)
 - [ ] **CORS origins**: Restricted to your domain (not `*`)
 - [ ] `.env` file permissions: `chmod 600 .env`
